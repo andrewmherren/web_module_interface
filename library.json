@@ -1,0 +1,26 @@
+{
+  "name": "web_module_interface",
+  "version": "1.0.0",
+  "description": "Abstract interface for web-enabled ESP32/ESP8266 modules",
+  "keywords": [
+    "web",
+    "http",
+    "https",
+    "esp32",
+    "esp8266",
+    "interface",
+    "abstract"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/andrewmherren/web_module_interface.git"
+  },
+  "frameworks": [
+    "arduino"
+  ],
+  "platforms": [
+    "espressif32",
+    "espressif8266"
+  ],
+  "dependencies": {}
+}
