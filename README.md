@@ -13,6 +13,7 @@ This library provides an abstract interface (`IWebModule`) that ensures consiste
 - **Flexible Routing**: Support for GET, POST, PUT, DELETE, and PATCH methods
 - **Content Type Aware**: Built-in content type specification
 - **Documentation Friendly**: Route descriptions for API documentation
+- **Namespace Isolation**: Uses `WebModule` namespace to avoid platform conflicts
 
 ## Usage
 
@@ -35,11 +36,11 @@ private:
 public:
   std::vector<WebRoute> getHttpRoutes() override {
     return {
-      WebRoute("/", HTTP_GET, [this](const String& body, const std::map<String, String>& params) {
+      WebRoute("/", WebModule::WM_GET, [this](const String& body, const std::map<String, String>& params) {
         return handleStatus();
       }, "application/json", "Get module status"),
       
-      WebRoute("/config", HTTP_POST, [this](const String& body, const std::map<String, String>& params) {
+      WebRoute("/config", WebModule::WM_POST, [this](const String& body, const std::map<String, String>& params) {
         return handleConfig(body, params);
       }, "application/json", "Update module configuration")
     };
@@ -65,18 +66,24 @@ public:
 ```cpp
 MyWebModule myModule;
 
-// Register HTTP routes
-auto httpRoutes = myModule.getHttpRoutes();
-for (const auto& route : httpRoutes) {
-  webRouter.addHttpRoute(("/mymodule" + route.path).c_str(), 
-                         route.method, route.handler);
-}
+// Register module with web router (recommended approach)
+webRouter.registerModule("/mymodule", &myModule);
 
-// Register HTTPS routes  
-auto httpsRoutes = myModule.getHttpsRoutes();
-for (const auto& route : httpsRoutes) {
-  webRouter.addHttpsRoute(("/mymodule" + route.path).c_str(), 
-                          route.method, route.handler);
+// Or register manually if needed:
+auto routes = myModule.getHttpRoutes();
+for (const auto& route : routes) {
+  webRouter.addRoute(("/mymodule" + route.path).c_str(), 
+                     route.method, 
+                     [route](HTTPServerClass &server) {
+                       // Convert server request to module format
+                       std::map<String, String> params;
+                       for (int i = 0; i < server.args(); i++) {
+                         params[server.argName(i)] = server.arg(i);
+                       }
+                       String body = server.hasArg("plain") ? server.arg("plain") : "";
+                       String response = route.handler(body, params);
+                       server.send(200, route.contentType, response);
+                     });
 }
 ```
 
@@ -98,22 +105,22 @@ for (const auto& route : httpsRoutes) {
 
 ```cpp
 struct WebRoute {
-  String path;          // Route path (e.g., "/status", "/config")
-  HTTPMethod method;    // HTTP method enum
-  RouteHandler handler; // Function pointer to handler
-  String contentType;   // MIME type (e.g., "application/json")
-  String description;   // Human-readable description
+  String path;                     // Route path (e.g., "/status", "/config")
+  WebModule::Method method;        // HTTP method enum
+  WebModule::RouteHandler handler; // Function pointer to handler
+  String contentType;              // MIME type (e.g., "application/json")
+  String description;              // Human-readable description
 };
 ```
 
 ## HTTP Methods
 
 Supported HTTP methods via enum:
-- `HTTP_GET`
-- `HTTP_POST` 
-- `HTTP_PUT`
-- `HTTP_DELETE`
-- `HTTP_PATCH`
+- `WebModule::WM_GET`
+- `WebModule::WM_POST` 
+- `WebModule::WM_PUT`
+- `WebModule::WM_DELETE`
+- `WebModule::WM_PATCH`
 
 ## Installation
 
