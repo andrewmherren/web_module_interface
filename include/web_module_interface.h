@@ -1,6 +1,7 @@
 #ifndef WEB_MODULE_INTERFACE_H
 #define WEB_MODULE_INTERFACE_H
 
+#include "web_ui_styles.h"
 #include <Arduino.h>
 #include <functional>
 #include <map>
@@ -51,6 +52,10 @@ struct WebRoute {
 
 // Abstract interface that all web modules must implement
 class IWebModule {
+private:
+  static String globalCSS;
+  static bool globalCSSSet;
+
 public:
   virtual ~IWebModule() = default;
 
@@ -65,6 +70,17 @@ public:
 
   // Convenience method for modules with identical HTTP/HTTPS routes
   virtual std::vector<WebRoute> getWebRoutes() { return getHttpRoutes(); }
+
+  // Phase 1: Custom CSS System
+  // Global CSS management - affects all modules
+  static void setGlobalCSS(const String &css);
+  static String getGlobalCSS();
+
+  // Helper method to get CSS route for serving at /assets/style.css
+  static WebRoute getCSSRoute();
+
+  // Helper method to inject CSS link into HTML pages
+  static String injectCSSLink(const String &htmlContent);
 };
 
 // Utility functions for HTTP method conversion
