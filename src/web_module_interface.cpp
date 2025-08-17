@@ -1,0 +1,133 @@
+#include "../include/web_module_interface.h"
+
+// Initialize static variables
+String IWebModule::globalCSS = WEB_UI_DEFAULT_CSS;
+bool IWebModule::globalCSSSet = false;
+std::vector<NavigationItem> IWebModule::navigationMenu;
+String IWebModule::currentPath = "";
+
+// Phase 1: Custom CSS System
+void IWebModule::setGlobalCSS(const String &css) {
+  globalCSS = css;
+  globalCSSSet = true;
+}
+
+String IWebModule::getGlobalCSS() { return globalCSS; }
+
+WebRoute IWebModule::getCSSRoute() {
+  return WebRoute(
+      "/assets/style.css", WebModule::WM_GET,
+      [](const String &, const std::map<String, String> &) {
+        return IWebModule::getGlobalCSS();
+      },
+      "text/css", "Global CSS stylesheet");
+}
+
+String IWebModule::injectCSSLink(const String &htmlContent) {
+  // Find the closing head tag or insert at the beginning if no head tag
+  int headPos = htmlContent.indexOf("</head>");
+  if (headPos == -1) {
+    int htmlPos = htmlContent.indexOf("<html>");
+    if (htmlPos != -1) {
+      // Insert after <html> tag with a new head section
+      return htmlContent.substring(0, htmlPos + 6) +
+             "\n<head>\n<link rel=\"stylesheet\" "
+             "href=\"/assets/style.css\">\n</head>\n" +
+             htmlContent.substring(htmlPos + 6);
+    } else {
+      // No HTML tag, insert at the beginning
+      return "<head>\n<link rel=\"stylesheet\" "
+             "href=\"/assets/style.css\">\n</head>\n" +
+             htmlContent;
+    }
+  } else {
+    // Insert before the closing head tag
+    return htmlContent.substring(0, headPos) +
+           "\n<link rel=\"stylesheet\" href=\"/assets/style.css\">\n" +
+           htmlContent.substring(headPos);
+  }
+}
+
+// Phase 2: Navigation Menu System
+void IWebModule::setNavigationMenu(const std::vector<NavigationItem> &items) {
+  navigationMenu = items;
+}
+
+std::vector<NavigationItem> IWebModule::getNavigationMenu() {
+  return navigationMenu;
+}
+
+void IWebModule::setCurrentPath(const String &path) { currentPath = path; }
+
+String IWebModule::getCurrentPath() { return currentPath; }
+
+String IWebModule::generateNavigationHtml() {
+  if (navigationMenu.empty()) {
+    return "";
+  }
+
+  String html = "<div class=\"nav-links\">\n";
+  for (const auto &item : navigationMenu) {
+    html += "  <a href=\"" + item.url + "\"";
+
+    // Auto-detect active state by comparing with current path
+    if (!currentPath.isEmpty() &&
+        (currentPath == item.url ||
+         (item.url != "/" && currentPath.startsWith(item.url)))) {
+      html += " class=\"active\"";
+    }
+
+    if (item.target.length() > 0) {
+      html += " target=\"" + item.target + "\"";
+    }
+
+    html += ">" + item.name + "</a>\n";
+  }
+  html += "</div>\n";
+
+  return html;
+}
+
+String IWebModule::injectNavigationMenu(const String &htmlContent) {
+  // Generate the navigation HTML
+  String navHtml = generateNavigationHtml();
+  if (navHtml.length() == 0) {
+    return htmlContent; // No navigation menu to inject
+  }
+
+  // Look for the placeholder comment first (most preferred)
+  int placeholderPos = htmlContent.indexOf(
+      "<!-- Navigation menu will be auto-injected here -->");
+  if (placeholderPos == -1) {
+    placeholderPos = htmlContent.indexOf(
+        "<!-- Navigation will be automatically injected here -->");
+  }
+
+  if (placeholderPos != -1) {
+    // Replace the placeholder with navigation HTML
+    int placeholderEnd = htmlContent.indexOf("-->", placeholderPos) + 3;
+    return htmlContent.substring(0, placeholderPos) + navHtml +
+           htmlContent.substring(placeholderEnd);
+  }
+
+  // Try to find container to inject into
+  int containerPos = htmlContent.indexOf("<div class=\"container\">");
+  if (containerPos != -1) {
+    // Find the first div closing tag after the container opening
+    int divClosePos = htmlContent.indexOf(">", containerPos);
+    if (divClosePos != -1) {
+      return htmlContent.substring(0, divClosePos + 1) + "\n" + navHtml +
+             htmlContent.substring(divClosePos + 1);
+    }
+  }
+
+  // Fallback: Try to find the body tag
+  int bodyPos = htmlContent.indexOf("<body>");
+  if (bodyPos != -1) {
+    return htmlContent.substring(0, bodyPos + 6) + "\n" + navHtml +
+           htmlContent.substring(bodyPos + 6);
+  }
+
+  // Last resort: just prepend to the content
+  return navHtml + htmlContent;
+}

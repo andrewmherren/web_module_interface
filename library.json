@@ -1,7 +1,7 @@
 {
   "name": "web_module_interface",
-  "version": "1.1.0",
-  "description": "Abstract interface for web-enabled ESP32/ESP8266 modules with CSS theming system",
+  "version": "1.0.0",
+  "description": "Abstract interface for web-enabled ESP32/ESP8266 modules with CSS theming and navigation systems",
   "keywords": [
     "web",
     "http",
@@ -12,7 +12,9 @@
     "abstract",
     "css",
     "theming",
-    "ui"
+    "ui",
+    "navigation",
+    "menu"
   ],
   "repository": {
     "type": "git",
