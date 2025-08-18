@@ -413,6 +413,58 @@ label {
   padding: 8px 16px;
   font-size: 0.8em;
 }
+
+/* Error page specific styles */
+.error-page {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.error-page h1 {
+  font-size: 3em;
+  margin-bottom: 20px;
+  color: #fff;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.error-description {
+  font-size: 1.2em;
+  margin-bottom: 30px;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.5;
+}
+
+.error-actions {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 30px;
+}
+
+.error-actions .btn {
+  min-width: 150px;
+}
+
+@media (max-width: 600px) {
+  .error-page h1 {
+    font-size: 2.5em;
+  }
+  
+  .error-description {
+    font-size: 1em;
+  }
+  
+  .error-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .error-actions .btn {
+    width: 100%;
+    max-width: 300px;
+  }
+}
 )css";
 
 #endif // WEB_UI_STYLES_H

@@ -27,6 +27,13 @@ The Web Module Interface provides a standardized way to integrate web-enabled mo
 - **Flexible Menu Items**: Support for internal links and external links
 - **Easy Integration**: Simple HTML injection system
 
+### Phase 4: Error Page Customization
+- **Custom Error Pages**: Set custom HTML for specific HTTP status codes
+- **Default Error Pages**: Automatic generation of theme-aware error pages
+- **Theme Integration**: Error pages automatically adapt to current CSS theme
+- **Helpful Error Content**: Default pages include navigation and helpful actions
+- **Status Code Support**: Common codes (400, 401, 403, 404, 405, 500, 502, 503)
+
 ### Core Interface Features
 - **Protocol Agnostic**: Support for both HTTP and HTTPS routes
 - **Type Safety**: Compile-time enforcement of interface implementation
@@ -108,6 +115,49 @@ String htmlWithNav = IWebModule::injectNavigationMenu(htmlContent);
 ```
 
 The navigation system automatically determines which item is active based on the current path, eliminating the need to manually track active states.
+
+### 4. Error Page Customization
+
+A comprehensive error handling system that integrates with your themes:
+
+```cpp
+// Set custom error pages for specific status codes
+String custom404 = R"html(
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Page Not Found</title>
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Navigation menu will be auto-injected here -->
+    <div class="error-page">
+      <h1 class="error">Page Not Found</h1>
+      <p class="error-description">The page you're looking for doesn't exist.</p>
+      <div class="error-actions button-group">
+        <a href="/" class="btn btn-primary">Go Home</a>
+        <a href="javascript:history.back()" class="btn btn-secondary">Go Back</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>)html";
+
+IWebModule::setErrorPage(404, custom404);
+
+// Generate default error pages that adapt to current theme
+String errorPage = IWebModule::generateDefaultErrorPage(500, "Custom error message");
+
+// Get error pages (returns custom if set, otherwise generates default)
+String page404 = IWebModule::getErrorPage(404);
+```
+
+Error pages automatically:
+- Inherit the current global CSS theme
+- Include the navigation menu
+- Use appropriate status classes (error, warning, etc.)
+- Provide helpful actions and guidance
 
 ## Module Registration
 
@@ -289,6 +339,12 @@ webRouter.registerModule("/mymodule", &myModule);
 - `getCurrentPath()`: Get current path
 - `generateNavigationHtml()`: Generate navigation HTML
 - `injectNavigationMenu(const String& html)`: Inject navigation into HTML content
+
+### Error Page System Methods (Static)
+
+- `setErrorPage(int statusCode, const String& html)`: Set custom HTML for specific error codes
+- `getErrorPage(int statusCode)`: Get error page HTML (custom or default)
+- `generateDefaultErrorPage(int statusCode, const String& message)`: Generate theme-aware default error page
 
 ## Data Structures
 
@@ -489,10 +545,11 @@ Planned enhancements for this interface include:
 - Support for 302 temporary redirects (appropriate for embedded firmware)
 - Main page redirect configuration
 
-### Phase 4: Error Page Customization  
+### Phase 4: Error Page Customization (IMPLEMENTED)
 - `setErrorPage(int statusCode, const String& html)` for custom 404, 500, etc.
 - Default error pages with global CSS applied
 - Consistent error handling across modules
+- Theme-aware error pages that adapt to any custom CSS
 
 ### Phase 5: Asset Management
 - `addStaticAsset(const String& path, const String& content, const String& mimeType)`
@@ -505,6 +562,14 @@ Planned enhancements for this interface include:
 - Simplified module development (single route definition)
 
 ## Version History
+
+### v1.4.0 - Phase 4 Error Page Customization
+- Added custom error page system with setErrorPage() and getErrorPage()
+- Added generateDefaultErrorPage() for theme-aware default error pages
+- Enhanced error pages with automatic theme adaptation
+- Added comprehensive error page styling in default CSS
+- Included navigation menu integration in error pages
+- Added error_page_examples.cpp with usage demonstrations
 
 ### v1.2.0 - Phase 2 Navigation System
 - Added navigation menu system with NavigationItem structure

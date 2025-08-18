@@ -55,11 +55,11 @@ struct NavigationItem {
   String name;   // Display name for the menu item
   String url;    // URL the menu item links to
   String target; // Optional: target attribute for the link (e.g., "_blank")
-  
+
   // Constructors for convenience
   NavigationItem(const String &n, const String &u)
       : name(n), url(u), target("") {}
-      
+
   NavigationItem(const String &n, const String &u, const String &t)
       : name(n), url(u), target(t) {}
 };
@@ -70,7 +70,9 @@ private:
   static String globalCSS;
   static bool globalCSSSet;
   static std::vector<NavigationItem> navigationMenu;
-  static String currentPath;  // Store the current request path for auto-active detection
+  static String
+      currentPath; // Store the current request path for auto-active detection
+  static std::map<int, String> errorPages; // Custom error pages by status code
 
 public:
   virtual ~IWebModule() = default;
@@ -96,20 +98,27 @@ public:
   static WebRoute getCSSRoute();
 
   // Helper method to inject CSS link into HTML pages
-  static String injectCSSLink(const String &htmlContent);
-
-  // Phase 2: Navigation Menu System
+  static String
+  injectCSSLink(const String &htmlContent); // Phase 2: Navigation Menu System
   // Navigation menu management
   static void setNavigationMenu(const std::vector<NavigationItem> &items);
   static std::vector<NavigationItem> getNavigationMenu();
-  
+
   // Set current path for auto-active detection in navigation
   static void setCurrentPath(const String &path);
   static String getCurrentPath();
-  
+
   // Helper methods for navigation menu
   static String generateNavigationHtml();
   static String injectNavigationMenu(const String &htmlContent);
+
+  // Custom error page management
+  static void setErrorPage(int statusCode, const String &html);
+  static String getErrorPage(int statusCode);
+
+  // Helper method to generate default error pages with global CSS
+  static String generateDefaultErrorPage(int statusCode,
+                                         const String &message = "");
 };
 
 // Utility functions for HTTP method conversion
