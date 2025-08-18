@@ -244,6 +244,7 @@ String IWebModule::generateDefaultErrorPage(int statusCode,
   html += "</body>\n";
   html += "</html>\n";
 
-  // Apply navigation menu injection
-  return injectNavigationMenu(html);
+  // DO NOT auto-inject navigation - we'll do that explicitly when we use the
+  // error page This allows the caller to set the current path first
+  return html;
 }
