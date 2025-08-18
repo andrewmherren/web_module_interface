@@ -150,107 +150,9 @@ String IWebModule::getErrorPage(int statusCode) {
 
 String IWebModule::generateDefaultErrorPage(int statusCode,
                                             const String &message) {
-  String IWebModule::generateDefaultErrorPage(int statusCode,
-                                              const String &message) {
-    // Common error messages
-    String title, description;
-    String statusClass = "error"; // Default to error class for styling
-
-    switch (statusCode) {
-    case 400:
-      title = "400 Bad Request";
-      description = message.isEmpty()
-                        ? "The request could not be understood by the server."
-                        : message;
-      break;
-    case 401:
-      title = "401 Unauthorized";
-      description = message.isEmpty()
-                        ? "Authentication is required to access this resource."
-                        : message;
-      break;
-    case 403:
-      title = "403 Forbidden";
-      description = message.isEmpty()
-                        ? "You don't have permission to access this resource."
-                        : message;
-      break;
-    case 404:
-      title = "404 Page Not Found";
-      description =
-          message.isEmpty()
-              ? "The requested page could not be found on this server."
-              : message;
-      break;
-    case 405:
-      title = "405 Method Not Allowed";
-      description = message.isEmpty()
-                        ? "The request method is not allowed for this resource."
-                        : message;
-      break;
-    case 500:
-      title = "500 Internal Server Error";
-      description = message.isEmpty()
-                        ? "The server encountered an unexpected condition."
-                        : message;
-      break;
-    case 502:
-      title = "502 Bad Gateway";
-      description = message.isEmpty() ? "The server received an invalid "
-                                        "response from an upstream server."
-                                      : message;
-      break;
-    case 503:
-      title = "503 Service Unavailable";
-      description = message.isEmpty() ? "The server is temporarily unavailable."
-                                      : message;
-      statusClass = "warning"; // Service unavailable is more of a warning
-      break;
-    default:
-      title = String(statusCode) + " Error";
-      description = message.isEmpty()
-                        ? "An error occurred while processing your request."
-                        : message;
-      break;
-    }
-
-    // Generate HTML error page that adapts to any theme
-    String html = "<!DOCTYPE html>\n";
-    html += "<html lang=\"en\">\n";
-    html += "<head>\n";
-    html += "  <meta charset=\"UTF-8\">\n";
-    html += "  <meta name=\"viewport\" content=\"width=device-width, "
-            "initial-scale=1.0\">\n";
-    html += "  <title>" + title + "</title>\n";
-    html += "  <link rel=\"stylesheet\" href=\"/assets/style.css\">\n";
-    html += "</head>\n";
-    html += "<body>\n";
-    html += "  <div class=\"container\">\n";
-    html += "    <!-- Navigation menu will be auto-injected here -->\n";
-    html += "    <div class=\"error-page\">\n";
-    html += "      <h1 class=\"" + statusClass + "\">" + title + "</h1>\n";
-    html += "      <p class=\"error-description\">" + description + "</p>\n";
-    html += "      <div class=\"status-message " + statusClass + "\">\n";
-    html += "        <strong>What can you do?</strong><br>\n";
-    html += "        • Check the URL for typos<br>\n";
-    html += "        • Use the navigation menu above<br>\n";
-    html += "        • Return to the home page\n";
-    html += "      </div>\n";
-    html += "      <div class=\"error-actions button-group\">\n";
-    html +=
-        "        <a href=\"/\" class=\"btn btn-primary\">Return to Home</a>\n";
-    html += "        <a href=\"javascript:history.back()\" class=\"btn "
-            "btn-secondary\">Go Back</a>\n";
-    html += "      </div>\n";
-    html += "    </div>\n";
-    html += "  </div>\n";
-    html += "</body>\n";
-    html += "</html>\n";
-
-    // Apply navigation menu injection
-    return injectNavigationMenu(html);
-  }
+  // Common error messages
   String title, description;
+  String statusClass = "error"; // Default to error class for styling
 
   switch (statusCode) {
   case 400:
@@ -291,15 +193,15 @@ String IWebModule::generateDefaultErrorPage(int statusCode,
     break;
   case 502:
     title = "502 Bad Gateway";
-    description =
-        message.isEmpty()
-            ? "The server received an invalid response from an upstream server."
-            : message;
+    description = message.isEmpty() ? "The server received an invalid "
+                                      "response from an upstream server."
+                                    : message;
     break;
   case 503:
     title = "503 Service Unavailable";
     description =
         message.isEmpty() ? "The server is temporarily unavailable." : message;
+    statusClass = "warning"; // Service unavailable is more of a warning
     break;
   default:
     title = String(statusCode) + " Error";
@@ -309,7 +211,7 @@ String IWebModule::generateDefaultErrorPage(int statusCode,
     break;
   }
 
-  // Generate HTML error page with global CSS
+  // Generate HTML error page that adapts to any theme
   String html = "<!DOCTYPE html>\n";
   html += "<html lang=\"en\">\n";
   html += "<head>\n";
@@ -323,10 +225,17 @@ String IWebModule::generateDefaultErrorPage(int statusCode,
   html += "  <div class=\"container\">\n";
   html += "    <!-- Navigation menu will be auto-injected here -->\n";
   html += "    <div class=\"error-page\">\n";
-  html += "      <h1>" + title + "</h1>\n";
+  html += "      <h1 class=\"" + statusClass + "\">" + title + "</h1>\n";
   html += "      <p class=\"error-description\">" + description + "</p>\n";
-  html += "      <div class=\"error-actions\">\n";
-  html += "        <a href=\"/\" class=\"btn\">Return to Home</a>\n";
+  html += "      <div class=\"status-message " + statusClass + "\">\n";
+  html += "        <strong>What can you do?</strong><br>\n";
+  html += "        • Check the URL for typos<br>\n";
+  html += "        • Use the navigation menu above<br>\n";
+  html += "        • Return to the home page\n";
+  html += "      </div>\n";
+  html += "      <div class=\"error-actions button-group\">\n";
+  html +=
+      "        <a href=\"/\" class=\"btn btn-primary\">Return to Home</a>\n";
   html += "        <a href=\"javascript:history.back()\" class=\"btn "
           "btn-secondary\">Go Back</a>\n";
   html += "      </div>\n";
@@ -337,4 +246,92 @@ String IWebModule::generateDefaultErrorPage(int statusCode,
 
   // Apply navigation menu injection
   return injectNavigationMenu(html);
+}
+String title, description;
+
+switch (statusCode) {
+case 400:
+  title = "400 Bad Request";
+  description = message.isEmpty()
+                    ? "The request could not be understood by the server."
+                    : message;
+  break;
+case 401:
+  title = "401 Unauthorized";
+  description = message.isEmpty()
+                    ? "Authentication is required to access this resource."
+                    : message;
+  break;
+case 403:
+  title = "403 Forbidden";
+  description = message.isEmpty()
+                    ? "You don't have permission to access this resource."
+                    : message;
+  break;
+case 404:
+  title = "404 Page Not Found";
+  description = message.isEmpty()
+                    ? "The requested page could not be found on this server."
+                    : message;
+  break;
+case 405:
+  title = "405 Method Not Allowed";
+  description = message.isEmpty()
+                    ? "The request method is not allowed for this resource."
+                    : message;
+  break;
+case 500:
+  title = "500 Internal Server Error";
+  description = message.isEmpty()
+                    ? "The server encountered an unexpected condition."
+                    : message;
+  break;
+case 502:
+  title = "502 Bad Gateway";
+  description =
+      message.isEmpty()
+          ? "The server received an invalid response from an upstream server."
+          : message;
+  break;
+case 503:
+  title = "503 Service Unavailable";
+  description =
+      message.isEmpty() ? "The server is temporarily unavailable." : message;
+  break;
+default:
+  title = String(statusCode) + " Error";
+  description = message.isEmpty()
+                    ? "An error occurred while processing your request."
+                    : message;
+  break;
+}
+
+// Generate HTML error page with global CSS
+String html = "<!DOCTYPE html>\n";
+html += "<html lang=\"en\">\n";
+html += "<head>\n";
+html += "  <meta charset=\"UTF-8\">\n";
+html += "  <meta name=\"viewport\" content=\"width=device-width, "
+        "initial-scale=1.0\">\n";
+html += "  <title>" + title + "</title>\n";
+html += "  <link rel=\"stylesheet\" href=\"/assets/style.css\">\n";
+html += "</head>\n";
+html += "<body>\n";
+html += "  <div class=\"container\">\n";
+html += "    <!-- Navigation menu will be auto-injected here -->\n";
+html += "    <div class=\"error-page\">\n";
+html += "      <h1>" + title + "</h1>\n";
+html += "      <p class=\"error-description\">" + description + "</p>\n";
+html += "      <div class=\"error-actions\">\n";
+html += "        <a href=\"/\" class=\"btn\">Return to Home</a>\n";
+html += "        <a href=\"javascript:history.back()\" class=\"btn "
+        "btn-secondary\">Go Back</a>\n";
+html += "      </div>\n";
+html += "    </div>\n";
+html += "  </div>\n";
+html += "</body>\n";
+html += "</html>\n";
+
+// Apply navigation menu injection
+return injectNavigationMenu(html);
 }
