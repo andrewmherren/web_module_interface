@@ -6,7 +6,7 @@
  */
 
 #include <Arduino.h>
-#include "../include/web_module_interface.h"
+#include <web_module_interface.h>
 
 // Example module implementing the interface
 class SimpleWebModule : public IWebModule {
@@ -17,6 +17,7 @@ private:
     <html>
     <head>
       <title>Simple Module</title>
+      <link rel="stylesheet" href="/assets/style.css">
     </head>
     <body>
       <div class="container">
@@ -29,15 +30,15 @@ private:
           <a href="/old-url" class="btn btn-secondary">Test Old URL (should redirect)</a>
           <a href="/main" class="btn btn-secondary">Test /main (should redirect)</a>
           <a href="/config" class="btn btn-secondary">Test /config (should redirect)</a>
+          <a href="/external" class="btn btn-warning">Test External Redirect</a>
         </div>
       </div>
     </body>
     </html>
     )html";
     
-    // Set current path and inject navigation/CSS
+    // Set current path and inject navigation
     IWebModule::setCurrentPath("/simple/");
-    html = IWebModule::injectCSSLink(html);
     html = IWebModule::injectNavigationMenu(html);
     
     return html;
@@ -76,47 +77,32 @@ void setup() {
   };
   IWebModule::setNavigationMenu(navItems);
   
-  // Configure simple redirects - typical embedded use case
-  // These are set once at startup and never changed
+  // Configure redirects
   
-  // Redirect root to main module
-  IWebModule::addRedirect("/", "/simple/");
+  // Internal redirects - pages within your application
+  IWebModule::addRedirect("/", "/simple/");        // Redirect root to main module
+  IWebModule::addRedirect("/old-url", "/simple/"); // Redirect legacy URL
+  IWebModule::addRedirect("/main", "/simple/");    // Shortcut to main page
+  IWebModule::addRedirect("/config", "/settings/"); // Intuitive alias for settings
   
-  // Redirect old URLs to new locations
-  IWebModule::addRedirect("/old-url", "/simple/");
-  IWebModule::addRedirect("/main", "/simple/");
-  IWebModule::addRedirect("/config", "/settings/");
+  // External redirect - to another website
+  IWebModule::addRedirect("/external", "https://www.example.com");
+  
+  // Module shortcuts - shorter URLs to access modules
+  IWebModule::addRedirect("/s", "/simple/");       // Short module alias
+  IWebModule::addRedirect("/o", "/other/");        // Short module alias
   
   Serial.println("Redirect rules configured:");
   Serial.println("  / -> /simple/");
   Serial.println("  /old-url -> /simple/");
   Serial.println("  /main -> /simple/");
   Serial.println("  /config -> /settings/");
+  Serial.println("  /external -> https://www.example.com");
+  Serial.println("  /s -> /simple/");
+  Serial.println("  /o -> /other/");
 }
 
 void loop() {
-  // Test the redirect system
-  static unsigned long lastTest = 0;
-  if (millis() - lastTest > 10000) { // Test every 10 seconds
-    lastTest = millis();
-    
-    // Test some paths to see if they redirect
-    testRedirect("/");
-    testRedirect("/main");
-    testRedirect("/config");
-    testRedirect("/nonexistent"); // Should not redirect
-    
-    Serial.println("---");
-  }
-  
+  // Your main loop code
   delay(100);
-}
-
-void testRedirect(const String& path) {
-  String target = IWebModule::getRedirectTarget(path);
-  if (!target.isEmpty()) {
-    Serial.printf("✓ Redirect: %s -> %s\n", path.c_str(), target.c_str());
-  } else {
-    Serial.printf("✗ No redirect: %s\n", path.c_str());
-  }
 }
