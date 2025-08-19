@@ -64,6 +64,16 @@ struct NavigationItem {
       : name(n), url(u), target(t) {}
 };
 
+// Redirect structure for managing URL redirects (simplified for embedded use)
+struct RedirectRule {
+  String fromPath; // Source path to redirect from
+  String toPath;   // Destination path to redirect to
+
+  // Constructor for convenience
+  RedirectRule(const String &from, const String &to)
+      : fromPath(from), toPath(to) {}
+};
+
 // Abstract interface that all web modules must implement
 class IWebModule {
 private:
@@ -73,6 +83,7 @@ private:
   static String
       currentPath; // Store the current request path for auto-active detection
   static std::map<int, String> errorPages; // Custom error pages by status code
+  static std::vector<RedirectRule> redirectRules; // URL redirect rules
 
 public:
   virtual ~IWebModule() = default;
@@ -119,6 +130,14 @@ public:
   // Helper method to generate default error pages with global CSS
   static String generateDefaultErrorPage(int statusCode,
                                          const String &message = "");
+
+  // Phase 3: Route Redirection System (simplified for embedded use)
+  // Add URL redirect rule (302 temporary redirect)
+  static void addRedirect(const String &fromPath, const String &toPath);
+
+  // Check if a path matches any redirect rule and return the redirect target
+  // Returns empty string if no redirect matches
+  static String getRedirectTarget(const String &requestPath);
 };
 
 // Utility functions for HTTP method conversion

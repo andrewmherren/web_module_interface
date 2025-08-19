@@ -6,6 +6,7 @@ bool IWebModule::globalCSSSet = false;
 std::vector<NavigationItem> IWebModule::navigationMenu;
 String IWebModule::currentPath = "";
 std::map<int, String> IWebModule::errorPages;
+std::vector<RedirectRule> IWebModule::redirectRules;
 
 // Phase 1: Custom CSS System
 void IWebModule::setGlobalCSS(const String &css) {
@@ -247,4 +248,22 @@ String IWebModule::generateDefaultErrorPage(int statusCode,
   // DO NOT auto-inject navigation - we'll do that explicitly when we use the
   // error page This allows the caller to set the current path first
   return html;
+}
+
+// Phase 3: Route Redirection System (simplified for embedded use)
+void IWebModule::addRedirect(const String &fromPath, const String &toPath) {
+  // Simple exact path matching only - no dynamic manipulation needed
+  redirectRules.push_back(RedirectRule(fromPath, toPath));
+}
+
+String IWebModule::getRedirectTarget(const String &requestPath) {
+  // Simple exact path matching only
+  for (const auto &rule : redirectRules) {
+    if (rule.fromPath == requestPath) {
+      return rule.toPath;
+    }
+  }
+
+  // No redirect found
+  return "";
 }

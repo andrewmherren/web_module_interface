@@ -27,6 +27,12 @@ The Web Module Interface provides a standardized way to integrate web-enabled mo
 - **Flexible Menu Items**: Support for internal links and external links
 - **Easy Integration**: Simple HTML injection system
 
+### Phase 3: Route Redirection System (Simplified for Embedded)
+- **Simple URL Redirects**: Lightweight exact path matching only
+- **302 Temporary Redirects**: Fixed status code appropriate for embedded firmware
+- **Server Integration**: Works with both HTTP and HTTPS servers
+- **Minimal Memory Footprint**: Optimized for embedded constraints
+
 ### Phase 4: Error Page Customization
 - **Custom Error Pages**: Set custom HTML for specific HTTP status codes
 - **Default Error Pages**: Automatic generation of theme-aware error pages
@@ -115,6 +121,31 @@ String htmlWithNav = IWebModule::injectNavigationMenu(htmlContent);
 ```
 
 The navigation system automatically determines which item is active based on the current path, eliminating the need to manually track active states.
+
+### 3. Route Redirection System
+
+A powerful URL redirection system for managing navigation flow:
+
+```cpp
+// Simple redirects - redirect root to main module (302 temporary redirect)
+IWebModule::addRedirect("/", "/usb_pd/");
+
+// Additional redirects as needed
+IWebModule::addRedirect("/config", "/wifi_ap/config");
+IWebModule::addRedirect("/main", "/usb_pd/");
+
+// Test if a path will redirect
+String target = IWebModule::getRedirectTarget("/config");
+if (!target.isEmpty()) {
+    Serial.printf("Redirect: /config -> %s\n", target.c_str());
+}
+```
+
+The redirect system supports:
+- **Exact Path Matching**: `/old-page` -> `/new-page`
+- **302 Temporary Redirects**: Appropriate for embedded firmware
+- **Server Integration**: Works with both HTTP and HTTPS servers
+- **Compile-time Setup**: Simple redirect configuration in setup()
 
 ### 4. Error Page Customization
 
@@ -340,6 +371,11 @@ webRouter.registerModule("/mymodule", &myModule);
 - `generateNavigationHtml()`: Generate navigation HTML
 - `injectNavigationMenu(const String& html)`: Inject navigation into HTML content
 
+### Route Redirection System Methods (Static)
+
+- `addRedirect(const String& fromPath, const String& toPath)`: Add simple URL redirect rule (302 status)
+- `getRedirectTarget(const String& requestPath)`: Check if path matches redirect rule
+
 ### Error Page System Methods (Static)
 
 - `setErrorPage(int statusCode, const String& html)`: Set custom HTML for specific error codes
@@ -371,6 +407,18 @@ struct NavigationItem {
   // Constructors for convenience
   NavigationItem(const String &n, const String &u);
   NavigationItem(const String &n, const String &u, const String &t);
+};
+```
+
+### RedirectRule Structure
+
+```cpp
+struct RedirectRule {
+  String fromPath;  // Source path to redirect from
+  String toPath;    // Destination path to redirect to
+  
+  // Constructor
+  RedirectRule(const String& from, const String& to);
 };
 ```
 
@@ -540,16 +588,17 @@ The CSS system is designed for single-threaded Arduino/ESP32 environments. The s
 
 Planned enhancements for this interface include:
 
-### Phase 3: Route Redirection System
-- `addRedirect(const String& fromPath, const String& toPath)` for URL redirection
-- Support for 302 temporary redirects (appropriate for embedded firmware)
-- Main page redirect configuration
+### ✅ Phase 3: Route Redirection System (IMPLEMENTED - Simplified)
+- Simple URL redirect management with `addRedirect()` for exact path matching
+- 302 temporary redirects (appropriate for embedded firmware)
+- Integrated with both HTTP and HTTPS servers
+- Optimized for minimal memory footprint on embedded devices
 
-### Phase 4: Error Page Customization (IMPLEMENTED)
-- `setErrorPage(int statusCode, const String& html)` for custom 404, 500, etc.
-- Default error pages with global CSS applied
-- Consistent error handling across modules
-- Theme-aware error pages that adapt to any custom CSS
+### ✅ Phase 4: Error Page Customization (IMPLEMENTED)
+- Custom error pages with `setErrorPage()` and `getErrorPage()`
+- Default themed error pages for common HTTP status codes
+- Automatic CSS and navigation injection
+- Consistent styling across all error conditions
 
 ### Phase 5: Asset Management
 - `addStaticAsset(const String& path, const String& content, const String& mimeType)`
@@ -562,6 +611,14 @@ Planned enhancements for this interface include:
 - Simplified module development (single route definition)
 
 ## Version History
+
+### v1.5.0 - Phase 3 Route Redirection System (Simplified)
+- Added lightweight URL redirect system with addRedirect() for exact path matching
+- Added RedirectRule structure for managing redirect configurations
+- Fixed 302 temporary redirect status appropriate for embedded firmware
+- Integrated redirect handling into both HTTP and HTTPS servers
+- Optimized for minimal memory footprint and embedded constraints
+- Removed complex features (wildcards, dynamic management) for simplicity
 
 ### v1.4.0 - Phase 4 Error Page Customization
 - Added custom error page system with setErrorPage() and getErrorPage()
