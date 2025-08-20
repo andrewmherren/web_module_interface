@@ -7,6 +7,7 @@ std::vector<NavigationItem> IWebModule::navigationMenu;
 String IWebModule::currentPath = "";
 std::map<int, String> IWebModule::errorPages;
 std::vector<RedirectRule> IWebModule::redirectRules;
+std::vector<StaticAsset> IWebModule::staticAssets;
 
 // Phase 1: Custom CSS System
 void IWebModule::setGlobalCSS(const String &css) {
@@ -266,4 +267,74 @@ String IWebModule::getRedirectTarget(const String &requestPath) {
 
   // No redirect found
   return "";
+}
+
+// Phase 5: Static Asset Management
+void IWebModule::addStaticAsset(const String &path, const String &content,
+                                const String &mimeType, bool useProgmem) {
+  staticAssets.push_back(StaticAsset(path, content, mimeType, useProgmem));
+}
+
+StaticAsset IWebModule::getStaticAsset(const String &path) {
+  for (const auto &asset : staticAssets) {
+    if (asset.path == path) {
+      return asset;
+    }
+  }
+
+  // Return empty asset if not found
+  return StaticAsset("", "", "");
+}
+
+bool IWebModule::hasStaticAsset(const String &path) {
+  for (const auto &asset : staticAssets) {
+    if (asset.path == path) {
+      return true;
+    }
+  }
+  return false;
+}
+
+std::vector<WebRoute> IWebModule::getStaticAssetRoutes() {
+  std::vector<WebRoute> routes;
+
+  for (const auto &asset : staticAssets) {
+    WebRoute route(
+        asset.path, WebModule::WM_GET,
+        [asset](const String &, const std::map<String, String> &) {
+          return asset.content;
+        },
+        asset.mimeType, "Static asset: " + asset.path);
+    routes.push_back(route);
+  }
+
+  return routes;
+}
+
+// Helper methods for common static assets
+void IWebModule::addJavaScript(const String &path, const String &jsCode,
+                               bool useProgmem) {
+  addStaticAsset(path, jsCode, "application/javascript", useProgmem);
+}
+
+void IWebModule::addImage(const String &path, const String &imageData,
+                          const String &imageType, bool useProgmem) {
+  String mimeType = "image/" + imageType;
+  addStaticAsset(path, imageData, mimeType, useProgmem);
+}
+
+void IWebModule::addFont(const String &path, const String &fontData,
+                         const String &fontType, bool useProgmem) {
+  String mimeType;
+  if (fontType == "ttf" || fontType == "otf") {
+    mimeType = "font/" + fontType;
+  } else if (fontType == "woff") {
+    mimeType = "font/woff";
+  } else if (fontType == "woff2") {
+    mimeType = "font/woff2";
+  } else {
+    mimeType = "application/octet-stream"; // Fallback for unknown font types
+  }
+
+  addStaticAsset(path, fontData, mimeType, useProgmem);
 }

@@ -74,6 +74,21 @@ struct RedirectRule {
       : fromPath(from), toPath(to) {}
 };
 
+// Static asset structure for serving files like JS, images, fonts
+struct StaticAsset {
+  String path;     // Asset path (e.g., "/assets/script.js", "/assets/logo.png")
+  String content;  // Asset content (can be stored in PROGMEM)
+  String mimeType; // MIME type (e.g., "application/javascript", "image/png")
+  bool useProgmem; // Whether content is stored in PROGMEM
+
+  // Constructors for convenience
+  StaticAsset(const String &p, const String &c, const String &m)
+      : path(p), content(c), mimeType(m), useProgmem(false) {}
+
+  StaticAsset(const String &p, const String &c, const String &m, bool progmem)
+      : path(p), content(c), mimeType(m), useProgmem(progmem) {}
+};
+
 // Abstract interface that all web modules must implement
 class IWebModule {
 private:
@@ -84,6 +99,8 @@ private:
       currentPath; // Store the current request path for auto-active detection
   static std::map<int, String> errorPages; // Custom error pages by status code
   static std::vector<RedirectRule> redirectRules; // URL redirect rules
+  static std::vector<StaticAsset>
+      staticAssets; // Static assets (JS, images, etc.)
 
 public:
   virtual ~IWebModule() = default;
@@ -138,6 +155,29 @@ public:
   // Check if a path matches any redirect rule and return the redirect target
   // Returns empty string if no redirect matches
   static String getRedirectTarget(const String &requestPath);
+
+  // Phase 5: Static Asset Management
+  // Add static asset (JavaScript, images, fonts, etc.)
+  static void addStaticAsset(const String &path, const String &content,
+                             const String &mimeType, bool useProgmem = false);
+
+  // Get static asset by path - returns empty StaticAsset if not found
+  static StaticAsset getStaticAsset(const String &path);
+
+  // Check if a path matches any static asset
+  static bool hasStaticAsset(const String &path);
+
+  // Get all static asset routes for registration with web router
+  static std::vector<WebRoute> getStaticAssetRoutes();
+
+  // Helper methods for common static assets
+  static void addJavaScript(const String &path, const String &jsCode,
+                            bool useProgmem = false);
+  static void addImage(const String &path, const String &imageData,
+                       const String &imageType = "png",
+                       bool useProgmem = false);
+  static void addFont(const String &path, const String &fontData,
+                      const String &fontType = "ttf", bool useProgmem = false);
 };
 
 // Utility functions for HTTP method conversion
