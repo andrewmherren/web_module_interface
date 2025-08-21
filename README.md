@@ -15,11 +15,12 @@ The Web Module Interface provides a standardized way to integrate web-enabled mo
 
 ## Features
 
-### Phase 1: Custom CSS System
-- **Global CSS Management**: Centralized styling with default glass morphism theme
-- **CSS Link Injection**: Automatic CSS inclusion in HTML responses
+### Static Asset Management
+- **Theme and CSS Management**: Centralized styling with default theme
+- **JavaScript and Image Support**: Serve JS files, images, and other assets
+- **PROGMEM Support**: Flash memory storage for large assets
 - **Embedded Style Guide**: Built-in default CSS following design standards
-- **Theme Customization**: Easy custom CSS application across all modules
+- **Multiple Asset Types**: Support for CSS, JS, images, fonts, and more
 
 ### Phase 2: Navigation Menu System
 - **Consistent Navigation**: Unified navigation across all modules
@@ -74,25 +75,28 @@ String getModuleDescription() const override { return "Web-enabled module"; }
 
 ## Enhanced Features
 
-### 1. Custom CSS System
+### 1. Static Asset System
 
-The interface provides a global CSS management system:
+The interface provides a comprehensive static asset management system:
 
 ```cpp
-// Set custom CSS for all modules
-IWebModule::setGlobalCSS(customCssString);
+// Initialize default theme
+IWebModule::initializeDefaultTheme();
 
-// Get current global CSS
-String css = IWebModule::getGlobalCSS();
+// Add custom CSS asset
+IWebModule::addStaticAsset("/assets/style.css", customCssString, "text/css");
 
-// Get route for serving CSS at /assets/style.css
-WebRoute cssRoute = IWebModule::getCSSRoute();
+// Add JavaScript file
+IWebModule::addJavaScript("/assets/app.js", jsCode);
 
-// Helper to inject CSS link into HTML content
-String htmlWithCss = IWebModule::injectCSSLink(htmlContent);
+// Add images with proper MIME types
+IWebModule::addImage("/assets/logo.png", pngData, "png");
+
+// Add fonts
+IWebModule::addFont("/assets/font.woff2", fontData, "woff2");
 ```
 
-Default CSS is based on a glass morphism design with a comprehensive set of components and utility classes.
+The default CSS is based on a glass morphism design with a comprehensive set of components and utility classes, automatically served at `/assets/style.css`.
 
 ### 2. Navigation Menu System
 
@@ -281,8 +285,7 @@ private:
     // Set current path for navigation highlighting
     IWebModule::setCurrentPath("/my-module/");
     
-    // Inject CSS and navigation
-    html = IWebModule::injectCSSLink(html);
+    // Inject navigation menu
     html = IWebModule::injectNavigationMenu(html);
     
     return html;
@@ -320,8 +323,8 @@ void setup() {
   };
   IWebModule::setNavigationMenu(navItems);
   
-  // Set custom CSS theme (optional)
-  IWebModule::setGlobalCSS(FPSTR(THEME_DARK_FUSCHIA));
+  // Initialize default theme
+  IWebModule::initializeDefaultTheme();
   
   // Initialize other components...
 }
@@ -355,12 +358,16 @@ webRouter.registerModule("/mymodule", &myModule);
 - `getModuleDescription()`: Returns description string
 - `getWebRoutes()`: Convenience method returning HTTP routes
 
-### CSS System Methods (Static)
+### Static Asset Methods (Static)
 
-- `setGlobalCSS(const String& css)`: Set custom CSS for all modules
-- `getGlobalCSS()`: Get current CSS (custom or default)
-- `getCSSRoute()`: Get WebRoute for serving CSS at /assets/style.css
-- `injectCSSLink(const String& html)`: Inject CSS link into HTML content
+- `initializeDefaultTheme()`: Initialize default theme CSS
+- `addStaticAsset(path, content, mimeType, useProgmem)`: Add any static asset
+- `addJavaScript(path, jsCode, useProgmem)`: Add JavaScript file
+- `addImage(path, imageData, imageType, useProgmem)`: Add image file
+- `addFont(path, fontData, fontType, useProgmem)`: Add font file
+- `getStaticAsset(path)`: Get static asset by path
+- `hasStaticAsset(path)`: Check if asset exists
+- `getStaticAssetRoutes()`: Get all static asset routes
 
 ### Navigation Menu System Methods (Static)
 
@@ -600,10 +607,10 @@ Planned enhancements for this interface include:
 - Automatic CSS and navigation injection
 - Consistent styling across all error conditions
 
-### Phase 5: Asset Management
-- `addStaticAsset(const String& path, const String& content, const String& mimeType)`
-- Support for JavaScript, images, fonts alongside CSS
-- Rich web interface development support
+### Phase 8: HTTPS Auto-Redirect (WEB_ROUTER ENHANCEMENT)
+- Automatic redirect of HTTP requests to HTTPS when certificates are present
+- Simplified module development (single route definition)
+- Enhanced security by ensuring secure connections
 
 ### Phase 6: HTTPS Auto-Redirect (WEB_ROUTER ENHANCEMENT)
 - `setHttpsRedirectMode(bool enabled)` in WebRouter class
@@ -612,34 +619,32 @@ Planned enhancements for this interface include:
 
 ## Version History
 
-### v1.5.0 - Phase 3 Route Redirection System (Simplified)
+### v2.0.0 - Static Asset Management System
+- Replaced CSS theme system with unified static asset management
+- Added support for all file types including JS, images, fonts
+- Added optimized PROGMEM support for memory-efficient asset storage
+- Simplified API with consistent helper methods
+- Improved memory efficiency and flexibility
+
+### v1.5.0 - Route Redirection System
 - Added lightweight URL redirect system with addRedirect() for exact path matching
 - Added RedirectRule structure for managing redirect configurations
 - Fixed 302 temporary redirect status appropriate for embedded firmware
 - Integrated redirect handling into both HTTP and HTTPS servers
 - Optimized for minimal memory footprint and embedded constraints
-- Removed complex features (wildcards, dynamic management) for simplicity
 
-### v1.4.0 - Phase 4 Error Page Customization
+### v1.4.0 - Error Page Customization
 - Added custom error page system with setErrorPage() and getErrorPage()
 - Added generateDefaultErrorPage() for theme-aware default error pages
 - Enhanced error pages with automatic theme adaptation
 - Added comprehensive error page styling in default CSS
 - Included navigation menu integration in error pages
-- Added error_page_examples.cpp with usage demonstrations
 
-### v1.2.0 - Phase 2 Navigation System
+### v1.2.0 - Navigation Menu System
 - Added navigation menu system with NavigationItem structure
 - Added auto-active detection based on current path
 - Added navigation HTML generation and injection
 - Updated example documentation for navigation integration
-
-### v1.1.0 - Phase 1 CSS System
-- Added global CSS theming system
-- Added default glass morphism CSS
-- Added CSS link injection helper
-- Added standard CSS class library
-- Added web_ui_styles.h with default theme
 
 ### v1.0.0 - Initial Release
 - Basic IWebModule interface

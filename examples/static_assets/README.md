@@ -79,7 +79,7 @@ String generateWebPage() {
 </html>
     )";
     
-    return IWebModule::injectCSSLink(IWebModule::injectNavigationMenu(html));
+    return IWebModule::injectNavigationMenu(html);
 }
 ```
 
@@ -178,7 +178,7 @@ if (asset.path != "") {
 
 ```
 /assets/
-├── style.css          (Global CSS via IWebModule::setGlobalCSS)
+├── style.css          (Default CSS via IWebModule::initializeDefaultTheme)
 ├── app.js             (Main application JavaScript)
 ├── utils.js           (Utility functions)
 ├── logo.png           (Site logo)

@@ -1,32 +1,115 @@
 #include "../include/web_module_interface.h"
 
 // Initialize static variables
-bool IWebModule::defaultThemeInitialized = false;
+String IWebModule::globalCSS = WEB_UI_DEFAULT_CSS;
+bool IWebModule::globalCSSSet = false;
+String IWebModule::baseCSS = "";
+String IWebModule::themeCSS = "";
+bool IWebModule::themeInitialized = false;
 std::vector<NavigationItem> IWebModule::navigationMenu;
 String IWebModule::currentPath = "";
 std::map<int, String> IWebModule::errorPages;
 std::vector<RedirectRule> IWebModule::redirectRules;
-std::vector<StaticAsset>
-    IWebModule::staticAssets; // Modern theme system using static assets
-void IWebModule::initializeDefaultTheme() {
-  // Only initialize once
-  if (defaultThemeInitialized)
-    return;
+std::vector<StaticAsset> IWebModule::staticAssets;
 
-  // Add default CSS as a static asset
-  addStaticAsset("/assets/style.css", WEB_UI_DEFAULT_CSS, "text/css", true);
-
-  defaultThemeInitialized = true;
+// Phase 1: Custom CSS System (BACKWARD COMPATIBILITY)
+void IWebModule::setGlobalCSS(const String &css) {
+  globalCSS = css;
+  globalCSSSet = true;
+  // When using legacy method, disable modern theme system
+  themeInitialized = false;
 }
 
-std::vector<WebRoute> IWebModule::getDefaultThemeRoutes() {
-  // Initialize default theme if not already done
-  if (!defaultThemeInitialized) {
-    initializeDefaultTheme();
+String IWebModule::getGlobalCSS() {
+  // If modern theme system is active, return combined CSS
+  if (themeInitialized && !baseCSS.isEmpty()) {
+    return baseCSS + "\n" + themeCSS;
+  }
+  // Otherwise return legacy CSS
+  return globalCSS;
+}
+
+WebRoute IWebModule::getCSSRoute() {
+  return WebRoute(
+      "/assets/style.css", WebModule::WM_GET,
+      [](const String &, const std::map<String, String> &) {
+        return IWebModule::getGlobalCSS();
+      },
+      "text/css", "Global CSS stylesheet");
+}
+
+// Phase 6: Theme System Modernization
+void IWebModule::initializeBaseTheme() {
+  // Only initialize once
+  if (themeInitialized)
+    return;
+
+  // Set base CSS framework (this would come from theme_assets.h or similar)
+  // For now, use the existing WEB_UI_DEFAULT_CSS as base
+  baseCSS = WEB_UI_DEFAULT_CSS;
+  themeCSS = ""; // No theme overlay by default
+  themeInitialized = true;
+  globalCSSSet = false; // Disable legacy system
+}
+
+void IWebModule::setTheme(const String &newBaseCSS, const String &newThemeCSS) {
+  baseCSS = newBaseCSS;
+  themeCSS = newThemeCSS;
+  themeInitialized = true;
+  globalCSSSet = false; // Disable legacy system when using modern themes
+}
+
+std::vector<WebRoute> IWebModule::getThemeAssetRoutes() {
+  std::vector<WebRoute> routes;
+
+  // Serve base CSS at /assets/base.css
+  if (!baseCSS.isEmpty()) {
+    WebRoute baseRoute(
+        "/assets/base.css", WebModule::WM_GET,
+        [](const String &, const std::map<String, String> &) {
+          return baseCSS;
+        },
+        "text/css", "Base CSS framework");
+    routes.push_back(baseRoute);
   }
 
-  // Return static asset routes (which includes CSS)
-  return getStaticAssetRoutes();
+  // Serve theme CSS at /assets/theme.css
+  if (!themeCSS.isEmpty()) {
+    WebRoute themeRoute(
+        "/assets/theme.css", WebModule::WM_GET,
+        [](const String &, const std::map<String, String> &) {
+          return themeCSS;
+        },
+        "text/css", "Theme overlay CSS");
+    routes.push_back(themeRoute);
+  }
+
+  return routes;
+}
+
+String IWebModule::injectCSSLink(const String &htmlContent) {
+  // Find the closing head tag or insert at the beginning if no head tag
+  int headPos = htmlContent.indexOf("</head>");
+  if (headPos == -1) {
+    int htmlPos = htmlContent.indexOf("<html>");
+    if (htmlPos != -1) {
+      // Insert after <html> tag with a new head section
+      return htmlContent.substring(0, htmlPos + 6) +
+             "\n<head>\n<link rel=\"stylesheet\" "
+             "href=\"/assets/style.css\">\n</head>\n" +
+             htmlContent.substring(htmlPos + 6);
+    } else {
+      // No HTML tag, insert at the beginning
+      return "<head>\n<link rel=\"stylesheet\" "
+             "href=\"/assets/style.css\">\n</head>\n" +
+             htmlContent;
+    }
+  } else {
+    // Insert before the closing head tag
+    return htmlContent.substring(0, headPos) +
+           "\n<link rel=\"stylesheet\" href=\"/assets/style.css\">\n" +
+           htmlContent.substring(headPos);
+  }
 }
 
 // Phase 2: Navigation Menu System
@@ -191,7 +274,7 @@ String IWebModule::generateDefaultErrorPage(int statusCode,
     break;
   }
 
-  // Generate HTML error page that uses static asset CSS
+  // Generate HTML error page that adapts to any theme
   String html = "<!DOCTYPE html>\n";
   html += "<html lang=\"en\">\n";
   html += "<head>\n";
@@ -315,4 +398,101 @@ void IWebModule::addFont(const String &path, const String &fontData,
   }
 
   addStaticAsset(path, fontData, mimeType, useProgmem);
+}
+
+// Phase 6: Theme System Modernization
+void IWebModule::initializeBaseTheme() {
+  // Only initialize once
+  if (themeInitialized)
+    return;
+
+  // Set base CSS framework (using existing default CSS as base)
+  baseCSS = WEB_UI_DEFAULT_CSS;
+  themeCSS = ""; // No theme overlay by default
+  themeInitialized = true;
+  globalCSSSet = false; // Disable legacy system
+}
+
+void IWebModule::setTheme(const String &newBaseCSS, const String &newThemeCSS) {
+  baseCSS = newBaseCSS;
+  themeCSS = newThemeCSS;
+  themeInitialized = true;
+  globalCSSSet = false; // Disable legacy system when using modern themes
+}
+
+std::vector<WebRoute> IWebModule::getThemeAssetRoutes() {
+  std::vector<WebRoute> routes;
+
+  // Serve base CSS at /assets/base.css
+  if (!baseCSS.isEmpty()) {
+    WebRoute baseRoute(
+        "/assets/base.css", WebModule::WM_GET,
+        [](const String &, const std::map<String, String> &) {
+          return baseCSS;
+        },
+        "text/css", "Base CSS framework");
+    routes.push_back(baseRoute);
+  }
+
+  // Serve theme CSS at /assets/theme.css
+  if (!themeCSS.isEmpty()) {
+    WebRoute themeRoute(
+        "/assets/theme.css", WebModule::WM_GET,
+        [](const String &, const std::map<String, String> &) {
+          return themeCSS;
+        },
+        "text/css", "Theme overlay CSS");
+    routes.push_back(themeRoute);
+  }
+
+  return routes;
+}
+
+// Phase 6: Theme System Modernization Implementation
+void IWebModule::initializeBaseTheme() {
+  // Only initialize once
+  if (themeInitialized)
+    return;
+
+  // Set base CSS framework (this would come from theme_assets.h or similar)
+  // For now, use the existing WEB_UI_DEFAULT_CSS as base
+  baseCSS = WEB_UI_DEFAULT_CSS;
+  themeCSS = ""; // No theme overlay by default
+  themeInitialized = true;
+  globalCSSSet = false; // Disable legacy system
+}
+
+void IWebModule::setTheme(const String &newBaseCSS, const String &newThemeCSS) {
+  baseCSS = newBaseCSS;
+  themeCSS = newThemeCSS;
+  themeInitialized = true;
+  globalCSSSet = false; // Disable legacy system when using modern themes
+}
+
+std::vector<WebRoute> IWebModule::getThemeAssetRoutes() {
+  std::vector<WebRoute> routes;
+
+  // Serve base CSS at /assets/base.css
+  if (!baseCSS.isEmpty()) {
+    WebRoute baseRoute(
+        "/assets/base.css", WebModule::WM_GET,
+        [](const String &, const std::map<String, String> &) {
+          return baseCSS;
+        },
+        "text/css", "Base CSS framework");
+    routes.push_back(baseRoute);
+  }
+
+  // Serve theme CSS at /assets/theme.css
+  if (!themeCSS.isEmpty()) {
+    WebRoute themeRoute(
+        "/assets/theme.css", WebModule::WM_GET,
+        [](const String &, const std::map<String, String> &) {
+          return themeCSS;
+        },
+        "text/css", "Theme overlay CSS");
+    routes.push_back(themeRoute);
+  }
+
+  return routes;
 }

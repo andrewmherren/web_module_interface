@@ -92,8 +92,7 @@ struct StaticAsset {
 // Abstract interface that all web modules must implement
 class IWebModule {
 private:
-  static String globalCSS;
-  static bool globalCSSSet;
+  static bool defaultThemeInitialized; // Track default theme initialization
   static std::vector<NavigationItem> navigationMenu;
   static String
       currentPath; // Store the current request path for auto-active detection
@@ -117,17 +116,12 @@ public:
   // Convenience method for modules with identical HTTP/HTTPS routes
   virtual std::vector<WebRoute> getWebRoutes() { return getHttpRoutes(); }
 
-  // Phase 1: Custom CSS System
-  // Global CSS management - affects all modules
-  static void setGlobalCSS(const String &css);
-  static String getGlobalCSS();
+  // Modern theme system using static assets
+  // Simplified approach - CSS handled through static asset system
+  static void initializeDefaultTheme();
+  static std::vector<WebRoute> getDefaultThemeRoutes();
 
-  // Helper method to get CSS route for serving at /assets/style.css
-  static WebRoute getCSSRoute();
-
-  // Helper method to inject CSS link into HTML pages
-  static String
-  injectCSSLink(const String &htmlContent); // Phase 2: Navigation Menu System
+  // Phase 2: Navigation Menu System
   // Navigation menu management
   static void setNavigationMenu(const std::vector<NavigationItem> &items);
   static std::vector<NavigationItem> getNavigationMenu();
