@@ -6,27 +6,17 @@ std::vector<NavigationItem> IWebModule::navigationMenu;
 String IWebModule::currentPath = "";
 std::map<int, String> IWebModule::errorPages;
 std::vector<RedirectRule> IWebModule::redirectRules;
-std::vector<StaticAsset>
-    IWebModule::staticAssets; // Modern theme system using static assets
-void IWebModule::initializeDefaultTheme() {
+std::vector<StaticAsset> IWebModule::staticAssets; // CSS Initialization System
+void IWebModule::initializeCSS(const String &customCSS) {
   // Only initialize once
   if (defaultThemeInitialized)
     return;
 
-  // Add default CSS as a static asset
-  addStaticAsset("/assets/style.css", WEB_UI_DEFAULT_CSS, "text/css", true);
+  // Use custom CSS if provided, otherwise use default
+  String cssContent = customCSS.length() > 0 ? customCSS : WEB_UI_DEFAULT_CSS;
+  addStaticAsset("/assets/style.css", cssContent, "text/css", true);
 
   defaultThemeInitialized = true;
-}
-
-std::vector<WebRoute> IWebModule::getDefaultThemeRoutes() {
-  // Initialize default theme if not already done
-  if (!defaultThemeInitialized) {
-    initializeDefaultTheme();
-  }
-
-  // Return static asset routes (which includes CSS)
-  return getStaticAssetRoutes();
 }
 
 // Phase 2: Navigation Menu System

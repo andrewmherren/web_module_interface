@@ -114,12 +114,14 @@ public:
   virtual String getModuleDescription() const { return "Web-enabled module"; }
 
   // Convenience method for modules with identical HTTP/HTTPS routes
-  virtual std::vector<WebRoute> getWebRoutes() { return getHttpRoutes(); }
+  virtual std::vector<WebRoute> getWebRoutes() {
+    return getHttpRoutes();
+  } // CSS Initialization System
+  // Initialize CSS for /assets/style.css - can use default or custom CSS
+  static void initializeCSS(const String &customCSS = "");
 
-  // Modern theme system using static assets
-  // Simplified approach - CSS handled through static asset system
-  static void initializeDefaultTheme();
-  static std::vector<WebRoute> getDefaultThemeRoutes();
+  // Backward compatibility - calls initializeCSS() with default CSS
+  static void initializeDefaultTheme() { initializeCSS(); }
 
   // Phase 2: Navigation Menu System
   // Navigation menu management
