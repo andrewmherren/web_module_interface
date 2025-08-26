@@ -6,7 +6,9 @@ std::vector<NavigationItem> IWebModule::navigationMenu;
 String IWebModule::currentPath = "";
 std::map<int, String> IWebModule::errorPages;
 std::vector<RedirectRule> IWebModule::redirectRules;
-std::vector<StaticAsset> IWebModule::staticAssets; // CSS Initialization System
+std::vector<StaticAsset> IWebModule::staticAssets;
+
+// CSS Initialization System
 void IWebModule::initializeCSS(const String &customCSS) {
   // Only initialize once
   if (defaultThemeInitialized)
@@ -17,6 +19,28 @@ void IWebModule::initializeCSS(const String &customCSS) {
   addStaticAsset("/assets/style.css", cssContent, "text/css", true);
 
   defaultThemeInitialized = true;
+}
+
+// Add additional CSS to existing stylesheet
+void IWebModule::addCustomCSS(const String &additionalCSS) {
+  // CSS must be initialized first
+  if (!defaultThemeInitialized) {
+    // Auto-initialize with default CSS if not already done
+    initializeCSS();
+  }
+
+  if (additionalCSS.length() == 0) {
+    return; // Nothing to add
+  }
+
+  // Find existing CSS asset and append to it
+  for (auto &asset : staticAssets) {
+    if (asset.path == "/assets/style.css") {
+      // Add newline separator and append the additional CSS
+      asset.content += "\n\n/* Additional Custom CSS */\n" + additionalCSS;
+      break;
+    }
+  }
 }
 
 // Phase 2: Navigation Menu System

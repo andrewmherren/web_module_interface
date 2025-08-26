@@ -1,43 +1,56 @@
-#include <web_module_interface.h>
 #include <Arduino.h>
+#include <web_module_interface.h>
 
-// Include theme assets
-#include "theme_assets.h"
+// Include theme examples
+#include "example_themes.h"
 
-void setupModernTheme() {
-  // Initialize the base theme framework (must be called before setting theme)
-  IWebModule::initializeBaseTheme();
-  
-  // Set the theme using base CSS framework and a theme overlay
-  // This replaces the older setGlobalCSS() approach
-  IWebModule::setTheme(
-    String(FPSTR(BASE_CSS)),    // Base CSS framework with standard classes
-    String(FPSTR(DARK_THEME_CSS))  // Theme overlay (could also use LIGHT_THEME_CSS or FUSCHIA_THEME_CSS)
-  );
-  
-  // Register theme asset routes with your web server
-  // This will serve the CSS files at /assets/base.css and /assets/theme.css
-  auto themeRoutes = IWebModule::getThemeAssetRoutes();
-  
-  // In a real application, you would register these routes with your server
-  // For example:
-  /*
-  for (const auto &route : themeRoutes) {
-    webRouter.addStaticContent(
-      route.path.c_str(),
-      route.handler("", std::map<String, String>()).c_str(),
-      route.contentType.c_str()
-    );
-  }
-  */
-  
-  // The combined CSS is still available at the legacy location
-  // for backward compatibility:
-  auto legacyCssRoute = IWebModule::getCSSRoute();
-  // This serves at /assets/style.css
+// Example 1: Using default CSS only
+void setupDefaultTheme() {
+  // Case 1: Use built-in default CSS
+  IWebModule::initializeCSS();
 }
 
-// Example of how to create HTML that uses the modern theme system
+// Example 2: Complete custom theme replacement
+void setupCustomTheme() {
+  // Case 2: Replace with entirely custom CSS
+  IWebModule::initializeCSS(String(FPSTR(THEME_DARK_FUSCHIA)));
+  // Could also use THEME_OCEAN_BLUE or THEME_LIGHT
+}
+
+// Example 3: Default CSS + additional styling
+void setupEnhancedTheme() {
+  // Define some additional CSS
+  const char EXTRA_STYLES[] PROGMEM = R"css(
+  /* Add some custom enhancements */
+  .custom-highlight {
+    background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 10px;
+    border-radius: 8px;
+    margin: 10px 0;
+  }
+  
+  .btn:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3) !important;
+  }
+  
+  .status-card {
+    transition: all 0.3s ease;
+  }
+  
+  .status-card:hover {
+    transform: scale(1.02);
+  }
+  )css";
+
+  // Case 3: Start with default CSS, then add custom styles
+  IWebModule::initializeCSS();                           // Use default CSS
+  IWebModule::addCustomCSS(String(FPSTR(EXTRA_STYLES))); // Add enhancements
+
+  // Or even simpler (auto-initializes default if not done):
+  // IWebModule::addCustomCSS(String(FPSTR(EXTRA_STYLES)));
+} // Example of how to create HTML that uses the CSS system
 String createThemedPage() {
   String html = R"(
 <!DOCTYPE html>
@@ -45,42 +58,66 @@ String createThemedPage() {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Modern Theme Example</title>
-  <!-- Modern theme system uses two CSS files -->
-  <link rel="stylesheet" href="/assets/base.css">
-  <link rel="stylesheet" href="/assets/theme.css">
-  <!-- Legacy compatibility is preserved via style.css -->
-  <!-- <link rel="stylesheet" href="/assets/style.css"> -->
+  <title>CSS System Example</title>
+  <!-- All CSS is served from a single file -->
+  <link rel="stylesheet" href="/assets/style.css">
 </head>
 <body>
   <div class="container">
-    <!-- Navigation will be automatically injected here -->
+    <!-- Navigation menu will be auto-injected here -->
     
-    <h1>Modern Theme System</h1>
-    <p>This page demonstrates the new modular theme system with base CSS framework and theme overlays.</p>
+    <h1>CSS Initialization Examples</h1>
+    <p>This page demonstrates the three CSS approaches available in the Web Module Interface system.</p>
     
     <div class="status-grid">
       <div class="status-card">
-        <h3>Base Framework</h3>
-        <p>Provides standard classes and structure</p>
-        <p class="info">Consistent naming conventions</p>
+        <h3>Default CSS</h3>
+        <p>Built-in styling for consistent appearance</p>
+        <p class="info">initializeCSS()</p>
       </div>
       
       <div class="status-card">
-        <h3>Theme Overlay</h3>
-        <p>Customizes colors and appearance</p>
-        <p class="success">Easy theme switching</p>
+        <h3>Custom CSS</h3>
+        <p>Complete theme replacement</p>
+        <p class="warning">initializeCSS(customCSS)</p>
+      </div>
+      
+      <div class="status-card">
+        <h3>Enhanced CSS</h3>
+        <p>Default + additional styling</p>
+        <p class="success">addCustomCSS(extraCSS)</p>
       </div>
     </div>
     
-    <div class="button-group">
-      <button class="btn">Standard Button</button>
-      <button class="btn btn-primary">Primary Button</button>
+    <!-- Example of enhanced styling if using Case 3 -->
+    <div class="custom-highlight">
+      <strong>Enhanced Styling Example</strong><br>
+      This element uses custom CSS added via addCustomCSS().
+    </div>
+    
+    <div class="nav-links">
+      <a href="#" class="btn">Standard Button</a>
+      <a href="#" class="btn btn-primary">Primary Button</a>
     </div>
   </div>
 </body>
 </html>
   )";
-  
+
   return html;
+}
+
+// Practical usage in a web module
+void handleThemeDemo() {
+  // Set current path for navigation
+  IWebModule::setCurrentPath("/demo");
+
+  // Generate the page HTML
+  String html = createThemedPage();
+
+  // Inject navigation menu
+  html = IWebModule::injectNavigationMenu(html);
+
+  // Return the complete HTML
+  // (In a real web module, this would be returned from a route handler)
 }

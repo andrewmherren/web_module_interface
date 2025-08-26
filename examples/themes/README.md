@@ -1,137 +1,201 @@
 # Web Module Interface - Theme Examples
 
-This directory contains example theme files that can be used with the Web Module Interface's static asset system.
+This directory contains example theme files that demonstrate the three CSS approaches available in the Web Module Interface system.
 
-## How to Use Custom CSS
+## CSS Initialization Options
 
-1. **Create your CSS content** as a PROGMEM constant:
-   ```cpp
-   const char MY_CUSTOM_CSS[] PROGMEM = R"css(
-   /* Your custom CSS here */
-   :root {
-     --primary-color: #8e44ad;
-     --secondary-color: #6c3483;
-     --bg-color: #f0f0f0;
-   }
-   
-   body {
-     background: var(--bg-color);
-     color: var(--text-color);
-   }
-   )css";
-   ```
+There are three ways to handle CSS in your application:
 
-2. **Add the CSS as a static asset** in your setup function:
-   ```cpp
-   void setup() {
-     // Initialize default theme first
-     IWebModule::initializeDefaultTheme();
-     
-     // Override with your custom CSS
-     IWebModule::addStaticAsset("/assets/style.css", 
-                                String(FPSTR(MY_CUSTOM_CSS)), 
-                                "text/css", true);
-     
-     // Continue with setup...
-   }
-   ```
-
-3. **Link to CSS in your HTML templates**:
-   ```html
-   <head>
-     <meta charset="UTF-8">
-     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-     <title>My Module</title>
-     <link rel="stylesheet" href="/assets/style.css">
-   </head>
-   ```
-   ## Static Asset Approach
-
-The static asset system manages all CSS files consistently:
-
+### 1. Use Default CSS Only
 ```cpp
-void setupCustomTheme() {
-  // Initialize the default theme first
-  IWebModule::initializeDefaultTheme();
-  
-  // Add additional CSS files
-  IWebModule::addStaticAsset("/assets/custom-theme.css", 
-                             String(FPSTR(MY_CUSTOM_THEME)), 
-                             "text/css", true);
-  
-  // Add JavaScript for theme switching (optional)
-  IWebModule::addJavaScript("/assets/theme-switcher.js", 
-                            String(FPSTR(THEME_SWITCHER_JS)), true);
+void setup() {
+  // Uses built-in default CSS
+  IWebModule::initializeCSS();
+  // or equivalent:
+  // IWebModule::initializeDefaultTheme();
 }
 ```
 
-## Multiple CSS Files
-
-You can organize your styling into multiple CSS files:
-
+### 2. Replace with Entirely Custom CSS
 ```cpp
-// Base framework
-IWebModule::addStaticAsset("/assets/base.css", String(FPSTR(BASE_CSS)), "text/css", true);
+const char MY_CUSTOM_CSS[] PROGMEM = R"css(
+/* Your complete custom CSS here */
+body {
+  font-family: Arial, sans-serif;
+  background: #f0f0f0;
+  color: #333;
+}
+/* ... rest of your CSS ... */
+)css";
 
-// Theme-specific colors
-IWebModule::addStaticAsset("/assets/theme.css", String(FPSTR(THEME_CSS)), "text/css", true);
-
-// Module-specific styling
-IWebModule::addStaticAsset("/assets/module.css", String(FPSTR(MODULE_CSS)), "text/css", true);
+void setup() {
+  // Replace default CSS completely
+  IWebModule::initializeCSS(String(FPSTR(MY_CUSTOM_CSS)));
+}
 ```
 
-Then include all files in your HTML:
+### 3. Use Default CSS + Additional CSS (NEW!)
+```cpp
+const char EXTRA_STYLING[] PROGMEM = R"css(
+/* Additional CSS to enhance default theme */
+.custom-card {
+  background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.special-button {
+  border-radius: 20px;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+)css";
+
+void setup() {
+  // Start with default CSS, then add custom styles
+  IWebModule::initializeCSS();
+  IWebModule::addCustomCSS(String(FPSTR(EXTRA_STYLING)));
+  
+  // Or even simpler (auto-initializes default if not done):
+  // IWebModule::addCustomCSS(String(FPSTR(EXTRA_STYLING)));
+}
+```
+
+## HTML Template Usage
+
+Once CSS is initialized, reference it in your HTML templates:
+
 ```html
-<link rel="stylesheet" href="/assets/base.css">
-<link rel="stylesheet" href="/assets/theme.css">
-<link rel="stylesheet" href="/assets/module.css">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Module</title>
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Navigation menu will be auto-injected here -->
+    <h1>My Application</h1>
+    <!-- Your content here -->
+  </div>
+</body>
+</html>
 ```
 
-## Available Themes
+## Complete Theme Examples
+
+The `example_themes.h` file contains three complete theme implementations:
 
 ### Dark Fuschia Theme
 A sleek dark theme with fuschia/pink accents. Perfect for a modern, striking interface.
+```cpp
+#include "example_themes.h"
+
+void setup() {
+  IWebModule::initializeCSS(String(FPSTR(THEME_DARK_FUSCHIA)));
+}
+```
 
 ### Ocean Blue Theme
 A calming blue theme with aqua accents. Good for a professional, serene look.
+```cpp
+#include "example_themes.h"
+
+void setup() {
+  IWebModule::initializeCSS(String(FPSTR(THEME_OCEAN_BLUE)));
+}
+```
 
 ### Light Theme
 A clean, light-colored theme with blue accents. Traditional and easy to read.
+```cpp
+#include "example_themes.h"
 
-## Customizing Themes
+void setup() {
+  IWebModule::initializeCSS(String(FPSTR(THEME_LIGHT)));
+}
+```
 
-To create your own theme:
+## Adding Custom Styles to Themes
 
-1. Create a new CSS constant with your theme styles
-2. Add it as a static asset during initialization
-3. Modify the CSS values to match your desired color scheme
-4. Link to your theme CSS in HTML templates
+You can enhance any theme (including default) with additional CSS:
 
-The most important elements to customize are:
+```cpp
+const char CUSTOM_ENHANCEMENTS[] PROGMEM = R"css(
+/* Add glowing effects to buttons */
+.btn:hover {
+  box-shadow: 0 0 20px rgba(61, 90, 241, 0.5);
+}
+
+/* Custom status indicator animations */
+.success {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+)css";
+
+void setup() {
+  // Use any base theme
+  IWebModule::initializeCSS(String(FPSTR(THEME_DARK_FUSCHIA)));
+  
+  // Add your enhancements
+  IWebModule::addCustomCSS(String(FPSTR(CUSTOM_ENHANCEMENTS)));
+}
+```
+
+## Creating Your Own Themes
+
+To create a completely custom theme:
+
+1. **Copy one of the existing themes** as a starting point
+2. **Modify colors and styles** to match your desired appearance
+3. **Test on actual hardware** - colors may appear differently on ESP devices
+4. **Store in PROGMEM** to save RAM
+
+Key elements to customize:
 - Background colors and gradients
 - Container styling (cards, borders)
-- Text colors
-- Button styles
-- Status indicators (success, error, etc.)
+- Text colors and fonts
+- Button styles and hover effects
+- Status indicators (success, error, warning, info)
+- Navigation menu appearance
 
 ## CSS Class Reference
 
-The themes include styling for these common UI elements:
+All themes support these common UI elements:
 
-- `.container` - Main content container
-- `.status-grid` - Grid layout for status cards
+- `.container` - Main content container with consistent padding and styling
+- `.status-grid` - CSS Grid layout for status cards (auto-fit, responsive)
 - `.status-card` - Individual status information cards
-- `.nav-links` - Navigation menu container
-- `.btn` - Buttons (including variants like `.btn-primary`)
-- `.success`, `.info`, `.warning`, `.error` - Status indicators
-- `.form-control` - Form input elements
-- `.pdo-card` - Used for power delivery option cards
+- `.nav-links` - Navigation menu container (flexbox layout)
+- `.btn` - Base button styling
+- `.btn-primary` - Primary action buttons with enhanced styling
+- `.success`, `.info`, `.warning`, `.error` - Status message colors
+- `.form-control` - Form input elements (text fields, selects, etc.)
+- `.pdo-card` - Special cards used for power delivery options
+- `.pdo-card.active` - Active state for PDO cards
 
-## Tips for Theme Development
+## Best Practices
 
-1. **Use PROGMEM**: All CSS should be stored in flash memory using PROGMEM to save RAM
-2. **Use FPSTR()**: When passing CSS to addStaticAsset(), always use FPSTR() to reference PROGMEM strings
-3. **Consistent classes**: Maintain consistent class names across themes for compatibility
-4. **Test on device**: Check themes on actual devices as colors may appear differently
-5. **Consider performance**: Complex CSS (like extensive gradients) may impact rendering on ESP devices
-6. **Organize assets**: Group related CSS files logically (base, theme, module-specific)
+1. **Use PROGMEM**: Store all CSS in flash memory to preserve RAM
+   ```cpp
+   const char MY_CSS[] PROGMEM = R"css(/* CSS here */)css";
+   ```
+
+2. **Use FPSTR()**: Always use FPSTR() when passing PROGMEM strings
+   ```cpp
+   IWebModule::initializeCSS(String(FPSTR(MY_CSS)));
+   ```
+
+3. **Test on hardware**: Colors and performance may differ on ESP devices
+
+4. **Keep it simple**: Complex CSS animations may impact performance on embedded devices
+
+5. **Maintain compatibility**: Use the standard CSS classes to ensure compatibility across modules
+
+6. **Consider memory**: Each CSS theme uses flash memory - balance features with available space
