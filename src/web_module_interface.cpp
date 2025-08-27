@@ -6,41 +6,18 @@ std::vector<NavigationItem> IWebModule::navigationMenu;
 String IWebModule::currentPath = "";
 std::map<int, String> IWebModule::errorPages;
 std::vector<RedirectRule> IWebModule::redirectRules;
-std::vector<StaticAsset> IWebModule::staticAssets;
 
-// CSS Initialization System
+// CSS Initialization System - This is now just a stub
 void IWebModule::initializeCSS(const String &customCSS) {
-  // Only initialize once
-  if (defaultThemeInitialized)
-    return;
-
-  // Use custom CSS if provided, otherwise use default
-  String cssContent = customCSS.length() > 0 ? customCSS : WEB_UI_DEFAULT_CSS;
-  addStaticAsset("/assets/style.css", cssContent, "text/css", true);
-
+  // This method is kept for backward compatibility but its implementation
+  // is now empty since static assets are managed through the route system
   defaultThemeInitialized = true;
 }
 
-// Add additional CSS to existing stylesheet
+// Add additional CSS to existing stylesheet - This is now just a stub
 void IWebModule::addCustomCSS(const String &additionalCSS) {
-  // CSS must be initialized first
-  if (!defaultThemeInitialized) {
-    // Auto-initialize with default CSS if not already done
-    initializeCSS();
-  }
-
-  if (additionalCSS.length() == 0) {
-    return; // Nothing to add
-  }
-
-  // Find existing CSS asset and append to it
-  for (auto &asset : staticAssets) {
-    if (asset.path == "/assets/style.css") {
-      // Add newline separator and append the additional CSS
-      asset.content += "\n\n/* Additional Custom CSS */\n" + additionalCSS;
-      break;
-    }
-  }
+  // This method is kept for backward compatibility but its implementation
+  // is now empty since static assets are managed through the route system
 }
 
 // Phase 2: Navigation Menu System
@@ -259,74 +236,4 @@ String IWebModule::getRedirectTarget(const String &requestPath) {
 
   // No redirect found
   return "";
-}
-
-// Phase 5: Static Asset Management
-void IWebModule::addStaticAsset(const String &path, const String &content,
-                                const String &mimeType, bool useProgmem) {
-  staticAssets.push_back(StaticAsset(path, content, mimeType, useProgmem));
-}
-
-StaticAsset IWebModule::getStaticAsset(const String &path) {
-  for (const auto &asset : staticAssets) {
-    if (asset.path == path) {
-      return asset;
-    }
-  }
-
-  // Return empty asset if not found
-  return StaticAsset("", "", "");
-}
-
-bool IWebModule::hasStaticAsset(const String &path) {
-  for (const auto &asset : staticAssets) {
-    if (asset.path == path) {
-      return true;
-    }
-  }
-  return false;
-}
-
-std::vector<WebRoute> IWebModule::getStaticAssetRoutes() {
-  std::vector<WebRoute> routes;
-
-  for (const auto &asset : staticAssets) {
-    WebRoute route(
-        asset.path, WebModule::WM_GET,
-        [asset](const String &, const std::map<String, String> &) {
-          return asset.content;
-        },
-        asset.mimeType, "Static asset: " + asset.path);
-    routes.push_back(route);
-  }
-
-  return routes;
-}
-
-// Helper methods for common static assets
-void IWebModule::addJavaScript(const String &path, const String &jsCode,
-                               bool useProgmem) {
-  addStaticAsset(path, jsCode, "application/javascript", useProgmem);
-}
-
-void IWebModule::addImage(const String &path, const String &imageData,
-                          const String &imageType, bool useProgmem) {
-  String mimeType = "image/" + imageType;
-  addStaticAsset(path, imageData, mimeType, useProgmem);
-}
-
-void IWebModule::addFont(const String &path, const String &fontData,
-                         const String &fontType, bool useProgmem) {
-  String mimeType;
-  if (fontType == "ttf" || fontType == "otf") {
-    mimeType = "font/" + fontType;
-  } else if (fontType == "woff") {
-    mimeType = "font/woff";
-  } else if (fontType == "woff2") {
-    mimeType = "font/woff2";
-  } else {
-    mimeType = "application/octet-stream"; // Fallback for unknown font types
-  }
-
-  addStaticAsset(path, fontData, mimeType, useProgmem);
 }
