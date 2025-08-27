@@ -1,4 +1,5 @@
 #include "web_response.h"
+#include "webserver_typedefs.h"
 
 #if defined(ESP32) || defined(ESP8266)
 #if defined(ESP32)
