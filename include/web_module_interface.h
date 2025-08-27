@@ -127,25 +127,12 @@ public:
   // Convenience method for modules with identical HTTP/HTTPS routes
   virtual std::vector<WebRoute> getWebRoutes() { return getHttpRoutes(); }
 
-  // Initialize CSS for /assets/style.css - can use default or custom CSS
-  // Note: This is kept for backward compatibility but does nothing
-  static void initializeCSS(const String &customCSS = "");
-
-  // Add additional CSS to existing stylesheet (must be called after
-  // initializeCSS) Note: This is kept for backward compatibility but does
-  // nothing
-  static void addCustomCSS(const String &additionalCSS);
-
-  // Static asset registration (deprecated - use route registration instead)
-  // Maintained for backward compatibility with existing modules
+  // Legacy methods (empty implementations maintained for API compatibility)
+  static void initializeCSS(const String &customCSS = "") {}
+  static void addCustomCSS(const String &additionalCSS) {}
   static void addStaticAsset(const String &path, const String &content,
-                             const String &mimeType, bool useProgmem = false) {
-    // This stub implementation does nothing. Modules should use WebPlatform's
-    // registerRoute() method instead to register static assets as routes.
-  }
-
-  // Backward compatibility - calls initializeCSS() with default CSS
-  static void initializeDefaultTheme() { initializeCSS(); }
+                             const String &mimeType, bool useProgmem = false) {}
+  static void initializeDefaultTheme() {}
 
   // Phase 2: Navigation Menu System
   // Navigation menu management
