@@ -7,19 +7,6 @@ String IWebModule::currentPath = "";
 std::map<int, String> IWebModule::errorPages;
 std::vector<RedirectRule> IWebModule::redirectRules;
 
-// CSS Initialization System - This is now just a stub
-void IWebModule::initializeCSS(const String &customCSS) {
-  // This method is kept for backward compatibility but its implementation
-  // is now empty since static assets are managed through the route system
-  defaultThemeInitialized = true;
-}
-
-// Add additional CSS to existing stylesheet - This is now just a stub
-void IWebModule::addCustomCSS(const String &additionalCSS) {
-  // This method is kept for backward compatibility but its implementation
-  // is now empty since static assets are managed through the route system
-}
-
 // Phase 2: Navigation Menu System
 void IWebModule::setNavigationMenu(const std::vector<NavigationItem> &items) {
   navigationMenu = items;

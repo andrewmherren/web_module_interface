@@ -15,13 +15,6 @@ The Web Module Interface provides a standardized way to integrate web-enabled mo
 
 ## Features
 
-### Static Asset Management
-- **Theme and CSS Management**: Centralized styling with default theme
-- **JavaScript and Image Support**: Serve JS files, images, and other assets
-- **PROGMEM Support**: Flash memory storage for large assets
-- **Embedded Style Guide**: Built-in default CSS following design standards
-- **Multiple Asset Types**: Support for CSS, JS, images, fonts, and more
-
 ### Phase 2: Navigation Menu System
 - **Consistent Navigation**: Unified navigation across all modules
 - **Auto-Active Detection**: Automatic highlighting of current page
@@ -74,29 +67,6 @@ String getModuleDescription() const override { return "Web-enabled module"; }
 ```
 
 ## Enhanced Features
-
-### 1. Static Asset System
-
-The interface provides a comprehensive static asset management system:
-
-```cpp
-// Initialize default theme
-IWebModule::initializeDefaultTheme();
-
-// Add custom CSS asset
-IWebModule::addStaticAsset("/assets/style.css", customCssString, "text/css");
-
-// Add JavaScript file
-IWebModule::addJavaScript("/assets/app.js", jsCode);
-
-// Add images with proper MIME types
-IWebModule::addImage("/assets/logo.png", pngData, "png");
-
-// Add fonts
-IWebModule::addFont("/assets/font.woff2", fontData, "woff2");
-```
-
-The default CSS is based on a glass morphism design with a comprehensive set of components and utility classes, automatically served at `/assets/style.css`.
 
 ### 2. Navigation Menu System
 
@@ -358,17 +328,6 @@ webRouter.registerModule("/mymodule", &myModule);
 - `getModuleDescription()`: Returns description string
 - `getWebRoutes()`: Convenience method returning HTTP routes
 
-### Static Asset Methods (Static)
-
-- `initializeDefaultTheme()`: Initialize default theme CSS
-- `addStaticAsset(path, content, mimeType, useProgmem)`: Add any static asset
-- `addJavaScript(path, jsCode, useProgmem)`: Add JavaScript file
-- `addImage(path, imageData, imageType, useProgmem)`: Add image file
-- `addFont(path, fontData, fontType, useProgmem)`: Add font file
-- `getStaticAsset(path)`: Get static asset by path
-- `hasStaticAsset(path)`: Check if asset exists
-- `getStaticAssetRoutes()`: Get all static asset routes
-
 ### Navigation Menu System Methods (Static)
 
 - `setNavigationMenu(const std::vector<NavigationItem>& items)`: Set global navigation menu
@@ -618,13 +577,6 @@ Planned enhancements for this interface include:
 - Simplified module development (single route definition)
 
 ## Version History
-
-### v2.0.0 - Static Asset Management System
-- Replaced CSS theme system with unified static asset management
-- Added support for all file types including JS, images, fonts
-- Added optimized PROGMEM support for memory-efficient asset storage
-- Simplified API with consistent helper methods
-- Improved memory efficiency and flexibility
 
 ### v1.5.0 - Route Redirection System
 - Added lightweight URL redirect system with addRedirect() for exact path matching

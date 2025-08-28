@@ -127,11 +127,7 @@ public:
   // Convenience method for modules with identical HTTP/HTTPS routes
   virtual std::vector<WebRoute> getWebRoutes() { return getHttpRoutes(); }
 
-  // Legacy methods (empty implementations maintained for API compatibility)
-  static void initializeCSS(const String &customCSS = "") {}
-  static void addCustomCSS(const String &additionalCSS) {}
-  static void addStaticAsset(const String &path, const String &content,
-                             const String &mimeType, bool useProgmem = false) {}
+  // Legacy method for backward compatibility
   static void initializeDefaultTheme() {}
 
   // Phase 2: Navigation Menu System
