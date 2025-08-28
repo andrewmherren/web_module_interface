@@ -1,6 +1,6 @@
 # Web Module Interface
 
-A flexible, unified interface for web-enabled modules in embedded projects with comprehensive theming and navigation systems.
+A flexible, unified interface for web-enabled modules in embedded projects with comprehensive theming, navigation, and authentication systems.
 
 ## Overview
 
@@ -12,22 +12,31 @@ The Web Module Interface provides a standardized way to integrate web-enabled mo
 - `WebRoute`: Structure defining HTTP/HTTPS routes and handlers
 - `WebModule` namespace: Contains method enums and handler function signatures
 - `NavigationItem`: Structure for defining navigation menu items
+- `AuthType`: Enum defining authentication requirements (SESSION, TOKEN, etc.)
+- `AuthContext`: Structure containing authentication state during request handling
 
 ## Features
 
-### Phase 2: Navigation Menu System
+### Authentication Framework
+- **Multiple Auth Types**: Support for SESSION, TOKEN, and NONE authentication
+- **Route-Level Protection**: Fine-grained auth requirements per route
+- **Auth Requirements Container**: Combine multiple allowed auth types (OR logic)
+- **Auth Context**: Track authentication state during request processing
+- **Helper Utilities**: Common patterns like sessionOnly(), sessionOrToken(), etc.
+
+### Navigation Menu System
 - **Consistent Navigation**: Unified navigation across all modules
 - **Auto-Active Detection**: Automatic highlighting of current page
 - **Flexible Menu Items**: Support for internal links and external links
 - **Easy Integration**: Simple HTML injection system
 
-### Phase 3: Route Redirection System (Simplified for Embedded)
+### Route Redirection System (Simplified for Embedded)
 - **Simple URL Redirects**: Lightweight exact path matching only
 - **302 Temporary Redirects**: Fixed status code appropriate for embedded firmware
 - **Server Integration**: Works with both HTTP and HTTPS servers
 - **Minimal Memory Footprint**: Optimized for embedded constraints
 
-### Phase 4: Error Page Customization
+### Error Page Customization
 - **Custom Error Pages**: Set custom HTML for specific HTTP status codes
 - **Default Error Pages**: Automatic generation of theme-aware error pages
 - **Theme Integration**: Error pages automatically adapt to current CSS theme
