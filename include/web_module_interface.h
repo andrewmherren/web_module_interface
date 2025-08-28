@@ -43,6 +43,7 @@ struct WebRoute {
   String contentType; // Optional: "text/html", "application/json"
   String description; // Optional: Human-readable description
   bool isUnified;     // Flag to indicate which handler to use
+  AuthRequirements authRequirements; // Authentication requirements for route
 
   // Constructors for legacy compatibility
   WebRoute()
@@ -65,18 +66,37 @@ struct WebRoute {
   WebRoute(const String &p, WebModule::Method m,
            WebModule::UnifiedRouteHandler h)
       : path(p), method(m), unifiedHandler(h), contentType("text/html"),
-        isUnified(true) {}
+        isUnified(true), authRequirements({AuthType::NONE}) {}
 
   WebRoute(const String &p, WebModule::Method m,
            WebModule::UnifiedRouteHandler h, const String &ct)
-      : path(p), method(m), unifiedHandler(h), contentType(ct),
-        isUnified(true) {}
+      : path(p), method(m), unifiedHandler(h), contentType(ct), isUnified(true),
+        authRequirements({AuthType::NONE}) {}
 
   WebRoute(const String &p, WebModule::Method m,
            WebModule::UnifiedRouteHandler h, const String &ct,
            const String &desc)
       : path(p), method(m), unifiedHandler(h), contentType(ct),
-        description(desc), isUnified(true) {}
+        description(desc), isUnified(true), authRequirements({AuthType::NONE}) {
+  }
+
+  // Constructors with auth requirements
+  WebRoute(const String &p, WebModule::Method m,
+           WebModule::UnifiedRouteHandler h, const AuthRequirements &auth)
+      : path(p), method(m), unifiedHandler(h), contentType("text/html"),
+        isUnified(true), authRequirements(auth) {}
+
+  WebRoute(const String &p, WebModule::Method m,
+           WebModule::UnifiedRouteHandler h, const AuthRequirements &auth,
+           const String &ct)
+      : path(p), method(m), unifiedHandler(h), contentType(ct), isUnified(true),
+        authRequirements(auth) {}
+
+  WebRoute(const String &p, WebModule::Method m,
+           WebModule::UnifiedRouteHandler h, const AuthRequirements &auth,
+           const String &ct, const String &desc)
+      : path(p), method(m), unifiedHandler(h), contentType(ct),
+        description(desc), isUnified(true), authRequirements(auth) {}
 };
 
 // Navigation menu item structure
