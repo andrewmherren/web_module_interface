@@ -12,10 +12,11 @@
  * alternative authentication methods (OR logic).
  */
 enum class AuthType {
-  NONE = 0,      // No authentication required
-  SESSION = 1,   // Session-based authentication (cookie)
-  TOKEN = 2,     // Token-based authentication (header/param)
-  LOCAL_ONLY = 4 // Local network access only (future)
+  NONE = 0,       // No authentication required
+  SESSION = 1,    // Session-based authentication (cookie)
+  TOKEN = 2,      // Token-based authentication (header/param)
+  LOCAL_ONLY = 4, // Local network access only
+  PAGE_TOKEN = 8  // CSRF protection for pages
 };
 
 /**
@@ -82,6 +83,7 @@ AuthRequirements none();
 AuthRequirements sessionOnly();
 AuthRequirements tokenOnly();
 AuthRequirements sessionOrToken();
+AuthRequirements pageTokenOnly();
 } // namespace AuthUtils
 
 #endif // AUTH_TYPES_H
