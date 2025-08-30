@@ -27,12 +27,5 @@
     "espressif32",
     "espressif8266"
   ],
-  "dependencies": {},
-  "build": {
-    "includeDir": "include",
-    "flags": [
-      "-I$PROJECT_LIBDEPS_DIR/$PIOENV/$PROJECT_NAME/assets"
-    ],
-    "srcDir": "src"
-  }
+  "dependencies": {}
 }
