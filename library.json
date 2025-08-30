@@ -29,9 +29,9 @@
   ],
   "dependencies": {},
   "build": {
-    "includeDir": [
-      "include",
-      "assets"
+    "includeDir": "include",
+    "flags": [
+      "-I$PROJECT_LIBDEPS_DIR/$PIOENV/$PROJECT_NAME/assets"
     ],
     "srcDir": "src"
   }
