@@ -33,7 +33,7 @@ private:
   String path;
   WebModule::Method method;
   String body;
-  String clientIP;
+  String clientIp;
   std::map<String, String> params;
   std::map<String, String> headers;
   AuthContext authContext; // Authentication information
@@ -53,7 +53,7 @@ public:
   String getPath() const { return path; }
   WebModule::Method getMethod() const { return method; }
   String getBody() const { return body; }
-  String getClientIP() const { return clientIP; }
+  String getClientIp() const { return clientIp; }
 
   // URL parameters (query string and POST form data)
   String getParam(const String &name) const;
@@ -78,7 +78,7 @@ private:
   void parseFormData(const String &formData);
   void parseHeaders();
 #if defined(ESP32)
-  void parseClientIP(httpd_req *req);
+  void parseClientIp(httpd_req *req);
 #endif
 };
 

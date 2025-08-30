@@ -39,8 +39,8 @@ WebRequest::WebRequest(WebServerClass *server) {
     headers[server->headerName(i)] = server->header(i);
   }
 
-  // Parse ClientIP
-  clientIP = server->client().remoteIP().toString();
+  // Parse ClientIp
+  clientIp = server->client().remoteIp().toString();
 }
 
 // Constructor for ESP-IDF HTTPS server
@@ -129,8 +129,8 @@ WebRequest::WebRequest(httpd_req *req) {
     }
   }
 
-  // Parse ClientIP
-  parseClientIP(req);
+  // Parse ClientIp
+  parseClientIp(req);
 }
 #endif
 
@@ -209,13 +209,15 @@ void WebRequest::parseFormData(const String &formData) {
   parseQueryParams(formData); // Form data uses same format as query params
 }
 
-void WebRequest::parseClientIP(httpd_req *req) {
+#if defined(ESP32)
+void WebRequest::parseClientIp(httpd_req *req) {
   int sockfd = httpd_req_to_sockfd(req);
   struct sockaddr_in addr;
   socklen_t len = sizeof(addr);
   if (getpeername(sockfd, (struct sockaddr *)&addr, &len) == 0) {
-    clientIP = String(inet_ntoa(addr.sin_addr));
+    clientIp = String(inet_ntoa(addr.sin_addr));
   } else {
-    clientIP = "unknown";
+    clientIp = "unknown";
   }
 }
+#endif
