@@ -7,6 +7,7 @@
 #endif
 
 #include "auth_types.h"
+#include "web_module_types.h"
 #include <Arduino.h>
 #include <map>
 

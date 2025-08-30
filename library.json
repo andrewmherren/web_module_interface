@@ -27,5 +27,12 @@
     "espressif32",
     "espressif8266"
   ],
-  "dependencies": {}
+  "dependencies": {},
+  "build": {
+    "includeDir": [
+      "include",
+      "assets"
+    ],
+    "srcDir": "src"
+  }
 }
