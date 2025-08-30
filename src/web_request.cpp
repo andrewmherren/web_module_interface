@@ -40,7 +40,7 @@ WebRequest::WebRequest(WebServerClass *server) {
   }
 
   // Parse ClientIp
-  clientIp = server->client().remoteIp().toString();
+  clientIp = server->client().remoteIP().toString();
 }
 
 // Constructor for ESP-IDF HTTPS server
