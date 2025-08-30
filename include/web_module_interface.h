@@ -1,6 +1,7 @@
 #ifndef WEB_MODULE_INTERFACE_H
 #define WEB_MODULE_INTERFACE_H
 
+#include "../assets/web_ui_styles.h"
 #include "auth_types.h"
 #include "web_request.h"
 #include "web_response.h"
