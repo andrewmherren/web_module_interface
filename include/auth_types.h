@@ -78,12 +78,6 @@ bool requiresAuth(const AuthRequirements &requirements);
 // Convert AuthType to string for debugging
 String authTypeToString(AuthType type);
 
-// Create common auth requirement patterns
-AuthRequirements none();
-AuthRequirements sessionOnly();
-AuthRequirements tokenOnly();
-AuthRequirements sessionOrToken();
-AuthRequirements pageTokenOnly();
 } // namespace AuthUtils
 
 #endif // AUTH_TYPES_H

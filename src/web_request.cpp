@@ -1,35 +1,28 @@
 #include "web_request.h"
 #include "webserver_typedefs.h"
 
-#if defined(ESP32) || defined(ESP8266)
 #if defined(ESP32)
 #include <WebServer.h>
-// Forward declare WebServerClass - the actual implementation is in
-// web_platform.h
+#include <arpa/inet.h>
+#include <esp_http_server.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
 #elif defined(ESP8266)
 #include <ESP8266WebServer.h>
-// Forward declare WebServerClass - the actual implementation is in
-// web_platform.h
-#endif
-#endif
-
-#if defined(ESP32)
-#include <esp_http_server.h>
 #endif
 
 // Constructor for Arduino WebServer
-#if defined(ESP32) || defined(ESP8266)
 WebRequest::WebRequest(WebServerClass *server) {
   if (!server)
     return;
 
   path = server->uri();
-  method = server->method() == HTTP_GET      ? "GET"
-           : server->method() == HTTP_POST   ? "POST"
-           : server->method() == HTTP_PUT    ? "PUT"
-           : server->method() == HTTP_DELETE ? "DELETE"
-           : server->method() == HTTP_PATCH  ? "PATCH"
-                                             : "GET";
+  method = server->method() == HTTP_GET      ? WebModule::WM_GET
+           : server->method() == HTTP_POST   ? WebModule::WM_POST
+           : server->method() == HTTP_PUT    ? WebModule::WM_PUT
+           : server->method() == HTTP_DELETE ? WebModule::WM_DELETE
+           : server->method() == HTTP_PATCH  ? WebModule::WM_PATCH
+                                             : WebModule::WM_GET;
 
   // Get request body for POST requests
   if (server->method() == HTTP_POST) {
@@ -45,8 +38,10 @@ WebRequest::WebRequest(WebServerClass *server) {
   for (int i = 0; i < server->headers(); i++) {
     headers[server->headerName(i)] = server->header(i);
   }
+
+  // Parse ClientIP
+  clientIP = server->client().remoteIP().toString();
 }
-#endif
 
 // Constructor for ESP-IDF HTTPS server
 #if defined(ESP32)
@@ -59,19 +54,22 @@ WebRequest::WebRequest(httpd_req *req) {
   // Convert HTTP method
   switch (req->method) {
   case HTTP_GET:
-    method = "GET";
+    method = WebModule::WM_GET;
     break;
   case HTTP_POST:
-    method = "POST";
+    method = WebModule::WM_POST;
     break;
   case HTTP_PUT:
-    method = "PUT";
+    method = WebModule::WM_PUT;
+    break;
+  case HTTP_PATCH:
+    method = WebModule::WM_PATCH;
     break;
   case HTTP_DELETE:
-    method = "DELETE";
+    method = WebModule::WM_DELETE;
     break;
   default:
-    method = "GET";
+    method = WebModule::WM_GET;
     break;
   }
 
@@ -102,11 +100,37 @@ WebRequest::WebRequest(httpd_req *req) {
     delete[] content;
   }
 
-  // Parse headers
-  size_t header_count = httpd_req_get_hdr_value_len(req, "");
-  // Note: ESP-IDF doesn't provide easy iteration over all headers
-  // Individual headers need to be requested by name
-  // Common headers can be pre-populated here if needed
+  // Parse headers - ESP-IDF requires requesting headers individually by name
+  const char *commonHeaders[] = {"Host",
+                                 "User-Agent",
+                                 "Accept",
+                                 "Accept-Language",
+                                 "Accept-Encoding",
+                                 "Content-Type",
+                                 "Content-Length",
+                                 "Authorization",
+                                 "Cookie",
+                                 "X-CSRF-Token",
+                                 "X-Requested-With",
+                                 "Referer",
+                                 "Cache-Control",
+                                 "Connection",
+                                 "Pragma"};
+
+  for (const char *headerName : commonHeaders) {
+    size_t headerLen = httpd_req_get_hdr_value_len(req, headerName);
+    if (headerLen > 0) {
+      char *headerValue = new char[headerLen + 1];
+      if (httpd_req_get_hdr_value_str(req, headerName, headerValue,
+                                      headerLen + 1) == ESP_OK) {
+        headers[String(headerName)] = String(headerValue);
+      }
+      delete[] headerValue;
+    }
+  }
+
+  // Parse ClientIP
+  parseClientIP(req);
 }
 #endif
 
@@ -183,4 +207,15 @@ void WebRequest::parseQueryParams(const String &query) {
 
 void WebRequest::parseFormData(const String &formData) {
   parseQueryParams(formData); // Form data uses same format as query params
+}
+
+void WebRequest::parseClientIP(httpd_req *req) {
+  int sockfd = httpd_req_to_sockfd(req);
+  struct sockaddr_in addr;
+  socklen_t len = sizeof(addr);
+  if (getpeername(sockfd, (struct sockaddr *)&addr, &len) == 0) {
+    clientIP = String(inet_ntoa(addr.sin_addr));
+  } else {
+    clientIP = "unknown";
+  }
 }

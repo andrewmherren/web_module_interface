@@ -42,61 +42,42 @@ struct WebRoute {
   WebModule::UnifiedRouteHandler unifiedHandler; // New unified handler
   String contentType; // Optional: "text/html", "application/json"
   String description; // Optional: Human-readable description
-  bool isUnified;     // Flag to indicate which handler to use
   AuthRequirements authRequirements; // Authentication requirements for route
-
-  // Constructors for legacy compatibility
-  WebRoute()
-      : method(WebModule::WM_GET), contentType("text/html"), isUnified(false) {}
-
-  WebRoute(const String &p, WebModule::Method m, WebModule::RouteHandler h)
-      : path(p), method(m), handler(h), contentType("text/html"),
-        isUnified(false) {}
-
-  WebRoute(const String &p, WebModule::Method m, WebModule::RouteHandler h,
-           const String &ct)
-      : path(p), method(m), handler(h), contentType(ct), isUnified(false) {}
-
-  WebRoute(const String &p, WebModule::Method m, WebModule::RouteHandler h,
-           const String &ct, const String &desc)
-      : path(p), method(m), handler(h), contentType(ct), description(desc),
-        isUnified(false) {}
 
   // Constructors for unified handlers
   WebRoute(const String &p, WebModule::Method m,
            WebModule::UnifiedRouteHandler h)
       : path(p), method(m), unifiedHandler(h), contentType("text/html"),
-        isUnified(true), authRequirements({AuthType::NONE}) {}
+        authRequirements({AuthType::NONE}) {}
 
   WebRoute(const String &p, WebModule::Method m,
            WebModule::UnifiedRouteHandler h, const String &ct)
-      : path(p), method(m), unifiedHandler(h), contentType(ct), isUnified(true),
+      : path(p), method(m), unifiedHandler(h), contentType(ct),
         authRequirements({AuthType::NONE}) {}
 
   WebRoute(const String &p, WebModule::Method m,
            WebModule::UnifiedRouteHandler h, const String &ct,
            const String &desc)
       : path(p), method(m), unifiedHandler(h), contentType(ct),
-        description(desc), isUnified(true), authRequirements({AuthType::NONE}) {
-  }
+        description(desc), authRequirements({AuthType::NONE}) {}
 
   // Constructors with auth requirements
   WebRoute(const String &p, WebModule::Method m,
            WebModule::UnifiedRouteHandler h, const AuthRequirements &auth)
       : path(p), method(m), unifiedHandler(h), contentType("text/html"),
-        isUnified(true), authRequirements(auth) {}
+        authRequirements(auth) {}
 
   WebRoute(const String &p, WebModule::Method m,
            WebModule::UnifiedRouteHandler h, const AuthRequirements &auth,
            const String &ct)
-      : path(p), method(m), unifiedHandler(h), contentType(ct), isUnified(true),
+      : path(p), method(m), unifiedHandler(h), contentType(ct),
         authRequirements(auth) {}
 
   WebRoute(const String &p, WebModule::Method m,
            WebModule::UnifiedRouteHandler h, const AuthRequirements &auth,
            const String &ct, const String &desc)
       : path(p), method(m), unifiedHandler(h), contentType(ct),
-        description(desc), isUnified(true), authRequirements(auth) {}
+        description(desc), authRequirements(auth) {}
 };
 
 // Navigation menu item structure
@@ -126,7 +107,6 @@ struct RedirectRule {
 // Abstract interface that all web modules must implement
 class IWebModule {
 private:
-  static bool defaultThemeInitialized; // Track default theme initialization
   static std::vector<NavigationItem> navigationMenu;
   static String
       currentPath; // Store the current request path for auto-active detection
@@ -147,9 +127,6 @@ public:
 
   // Convenience method for modules with identical HTTP/HTTPS routes
   virtual std::vector<WebRoute> getWebRoutes() { return getHttpRoutes(); }
-
-  // Legacy method for backward compatibility
-  static void initializeDefaultTheme() {}
 
   // Phase 2: Navigation Menu System
   // Navigation menu management

@@ -40,15 +40,4 @@ String authTypeToString(AuthType type) {
   }
 }
 
-AuthRequirements none() { return {AuthType::NONE}; }
-
-AuthRequirements sessionOnly() { return {AuthType::SESSION}; }
-
-AuthRequirements tokenOnly() { return {AuthType::TOKEN}; }
-AuthRequirements sessionOrToken() {
-  return {AuthType::SESSION, AuthType::TOKEN};
-}
-
-AuthRequirements pageTokenOnly() { return {AuthType::PAGE_TOKEN}; }
-
 } // namespace AuthUtils

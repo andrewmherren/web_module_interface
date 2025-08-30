@@ -1,6 +1,11 @@
 #ifndef WEB_REQUEST_H
 #define WEB_REQUEST_H
 
+// This include is already in Arduino.h, but added here to help linters
+#if defined(__CLANG_LINT__)
+#include <WString.h>
+#endif
+
 #include "auth_types.h"
 #include <Arduino.h>
 #include <map>
@@ -25,8 +30,9 @@ struct httpd_req;
 class WebRequest {
 private:
   String path;
-  String method;
+  WebModule::Method method;
   String body;
+  String clientIP;
   std::map<String, String> params;
   std::map<String, String> headers;
   AuthContext authContext; // Authentication information
@@ -44,8 +50,9 @@ public:
 
   // Request information
   String getPath() const { return path; }
-  String getMethod() const { return method; }
+  WebModule::Method getMethod() const { return method; }
   String getBody() const { return body; }
+  String getClientIP() const { return clientIP; }
 
   // URL parameters (query string and POST form data)
   String getParam(const String &name) const;
@@ -69,6 +76,9 @@ private:
   void parseQueryParams(const String &query);
   void parseFormData(const String &formData);
   void parseHeaders();
+#if defined(ESP32)
+  void parseClientIP(httpd_req *req);
+#endif
 };
 
 #endif // WEB_REQUEST_H

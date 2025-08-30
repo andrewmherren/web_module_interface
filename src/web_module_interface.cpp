@@ -1,7 +1,6 @@
 #include "../include/web_module_interface.h"
 
 // Initialize static variables
-bool IWebModule::defaultThemeInitialized = false;
 std::vector<NavigationItem> IWebModule::navigationMenu;
 String IWebModule::currentPath = "";
 std::map<int, String> IWebModule::errorPages;
@@ -91,7 +90,7 @@ String IWebModule::injectNavigationMenu(const String &htmlContent) {
   return navHtml + htmlContent;
 }
 
-// Phase 4: Error Page Customization
+// Error Page Customization
 void IWebModule::setErrorPage(int statusCode, const String &html) {
   errorPages[statusCode] = html;
 }
@@ -207,7 +206,7 @@ String IWebModule::generateDefaultErrorPage(int statusCode,
   return html;
 }
 
-// Phase 3: Route Redirection System (simplified for embedded use)
+// Route Redirection System (simplified for embedded use)
 void IWebModule::addRedirect(const String &fromPath, const String &toPath) {
   // Simple exact path matching only - no dynamic manipulation needed
   redirectRules.push_back(RedirectRule(fromPath, toPath));

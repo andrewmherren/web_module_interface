@@ -1,20 +1,15 @@
 #include "web_response.h"
 #include "webserver_typedefs.h"
 
-#if defined(ESP32) || defined(ESP8266)
 #if defined(ESP32)
 #include <WebServer.h>
+#include <esp_http_server.h>
 // Forward declare WebServerClass - the actual implementation is in
 // web_platform.h
 #elif defined(ESP8266)
 #include <ESP8266WebServer.h>
 // Forward declare WebServerClass - the actual implementation is in
 // web_platform.h
-#endif
-#endif
-
-#if defined(ESP32)
-#include <esp_http_server.h>
 #endif
 
 WebResponse::WebResponse()
@@ -55,7 +50,6 @@ String WebResponse::getHeader(const String &name) const {
 }
 
 // Send response to Arduino WebServer
-#if defined(ESP32) || defined(ESP8266)
 void WebResponse::sendTo(WebServerClass *server) {
   if (!server || responseSent)
     return;
@@ -72,8 +66,6 @@ void WebResponse::sendTo(WebServerClass *server) {
 
   markResponseSent();
 }
-#endif
-
 // Send response to ESP-IDF HTTPS server
 #if defined(ESP32)
 esp_err_t WebResponse::sendTo(httpd_req *req) {
